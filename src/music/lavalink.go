@@ -9,7 +9,6 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/disgoorg/disgolink/dgolink"
 	"github.com/disgoorg/disgolink/lavalink"
-	_ "github.com/joho/godotenv/autoload"
 )
 
 type Bot struct {
