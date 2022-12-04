@@ -8,6 +8,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/disgoorg/disgolink/dgolink"
 	"github.com/disgoorg/disgolink/lavalink"
+	_ "github.com/joho/godotenv/autoload"
 )
 
 type Bot struct {
@@ -28,14 +29,13 @@ func InitLink(s *discordgo.Session) *dgolink.Link {
 	return link
 }
 
-func RegisterNodes(link *dgolink.Link) (lavalink.Node, error) {
+func (b *Bot) RegisterNodes() {
 	secure, _ := strconv.ParseBool(os.Getenv("LAVALINK_SECURE"))
-	node, err := link.AddNode(context.TODO(), lavalink.NodeConfig{
-		Name:        "Chisato", // a unique node name
+	b.Link.AddNode(context.TODO(), lavalink.NodeConfig{
+		Name:        "Chisato",
 		Host:        os.Getenv("LAVALINK_HOST"),
 		Port:        os.Getenv("LAVALINK_PORT"),
 		Password:    os.Getenv("LAVALINK_PASSWORD"),
 		Secure:      secure,
 	})
-	return node, err
 }
