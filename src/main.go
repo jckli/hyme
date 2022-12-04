@@ -13,22 +13,24 @@ import (
 
 func main() {
 	session, err := discordgo.New("Bot " + os.Getenv("DISCORD_TOKEN"))
-	session.Identify.Intents = discordgo.IntentsGuildMessages
+	session.Identify.Intents = discordgo.IntentGuilds | discordgo.IntentGuildVoiceStates
 	if err != nil {
 		fmt.Println("Error creating Discord session: ", err)
-		return
-	}
-	session.AddHandler(commands.InteractionRecieved)
-	session.AddHandler(ReadyEvent)
-	err = session.Open()
-	if err != nil {
-		fmt.Println("Error opening connection: ", err)
 		return
 	}
 	bot := &music.Bot{
 		Link:           music.InitLink(session),
 		PlayerManagers: map[string]*music.PlayerManager{},
 	}
+	err = session.Open()
+	if err != nil {
+		fmt.Println("Error opening connection: ", err)
+		return
+	}
+	session.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		commands.InteractionRecieved(s, i, bot)
+	})
+	session.AddHandler(ReadyEvent)
 	bot.RegisterNodes()
 	commands.CreateCommands(session)
 	fmt.Println("Bot is running!")

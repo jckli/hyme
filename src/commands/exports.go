@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"os"
 	"github.com/bwmarrin/discordgo"
+	"github.com/jckli/hyme/src/music"
 )
 
-type CommandHandler func(s *discordgo.Session, i *discordgo.InteractionCreate)
+type CommandHandler func(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot)
 
 type Command struct {
 	Command 	*discordgo.ApplicationCommand
@@ -31,10 +32,10 @@ func DeleteCommands(s *discordgo.Session) {
 	}
 }
 
-func InteractionRecieved(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func InteractionRecieved(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot) {
 	for _, v := range Commands {
 		if i.ApplicationCommandData().Name == v.Command.Name {
-			v.Handler(s, i)
+			v.Handler(s, i, bot)
 		}
 	}
 }
@@ -52,4 +53,17 @@ var Commands = map[string]*Command{
 		Type: discordgo.ChatApplicationCommand,
 		Description: "Pong!",
 	}, Ping),
+	"play": New(&discordgo.ApplicationCommand{
+		Name: "play",
+		Type: discordgo.ChatApplicationCommand,
+		Description: "Play a song",
+		Options: []*discordgo.ApplicationCommandOption{
+			{
+				Type: discordgo.ApplicationCommandOptionString,
+				Name: "query",
+				Description: "The song to play",
+				Required: true,
+			},
+		},
+	}, music.PlayTrack),
 }
