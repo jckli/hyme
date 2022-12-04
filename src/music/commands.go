@@ -2,7 +2,6 @@ package music
 
 import (
 	"context"
-	"fmt"
 	"regexp"
 	"github.com/bwmarrin/discordgo"
 	"github.com/disgoorg/disgolink/lavalink"
@@ -32,7 +31,6 @@ func PlayTrack(s *discordgo.Session, i *discordgo.InteractionCreate, bot *Bot) {
 	if !urlYoutubePattern.MatchString(query) {
 		query = "ytsearch:" + query
 	}
-	fmt.Print(query)
 	_ = bot.Link.BestRestClient().LoadItemHandler(context.TODO(), query, lavalink.NewResultHandler(
 		func(track lavalink.AudioTrack) {
 			bot.Play(s, i, i.GuildID, voiceChannel.ID, track)

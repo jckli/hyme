@@ -6,7 +6,6 @@ import (
 )
 
 func GetCurrentVoiceChannel(userId string, guild *discordgo.Guild, s *discordgo.Session) (channel *discordgo.Channel, err error) {
-	fmt.Print(guild.VoiceStates)
 	for _, vs := range guild.VoiceStates {
 		if vs.UserID == userId {
 			channel, _ = s.State.Channel(vs.ChannelID)
