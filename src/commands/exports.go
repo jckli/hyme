@@ -65,5 +65,10 @@ var Commands = map[string]*Command{
 				Required: true,
 			},
 		},
-	}, music.PlayTrack),
+	}, PlayTrack),
+	"disconnect": New(&discordgo.ApplicationCommand{
+		Name: "disconnect",
+		Type: discordgo.ChatApplicationCommand,
+		Description: "Disconnect the bot from the voice channel",
+	}, Disconnect),
 }
