@@ -3,8 +3,9 @@ package commands
 import (
 	"context"
 	"regexp"
-	"time"
 	"strconv"
+	"time"
+	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"github.com/disgoorg/disgolink/v2/disgolink"
 	"github.com/disgoorg/disgolink/v2/lavalink"
@@ -67,10 +68,12 @@ func PlayTrack(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.
 			s.FollowupMessageCreate(i.Interaction, true, &discordgo.WebhookParams{
 				Embeds: utils.SuccessEmbed("Playing track: [`"+ tracks[0].Info.Title +"`]("+ *tracks[0].Info.URI +")"),
 			})
+			fmt.Println(player.Track())
+			fmt.Println(tracks[0])
 			if player.Track() == nil {
 				toPlay = &tracks[0]
 			} else {
-				queue.Add(tracks...)
+				queue.Add(tracks[0])
 			}
 		},
 		func() {
@@ -85,11 +88,9 @@ func PlayTrack(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.
 		},
 	))
 	if toPlay == nil {
-
 		return
 	}
-
-	err2 := bot.Session.ChannelVoiceJoinManual(i.GuildID, voiceState.ChannelID, false, false)
+	err2 := bot.Session.ChannelVoiceJoinManual(i.GuildID, voiceState.ChannelID, false, true)
 	if err2 != nil {
 		s.FollowupMessageCreate(i.Interaction, true, &discordgo.WebhookParams{
 			Embeds: utils.ErrorEmbed("Couldn't join the voice channel."),
@@ -110,7 +111,6 @@ func Disconnect(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music
 		})
 		return
 	}
-	player.Destroy(context.Background())
 	err := bot.Session.ChannelVoiceJoinManual(i.GuildID, "", false, false)
 	if err != nil {
 		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -121,6 +121,7 @@ func Disconnect(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music
 		})
 		return
 	}
+	bot.Lavalink.RemovePlayer(snowflake.MustParse(i.GuildID))
 	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
