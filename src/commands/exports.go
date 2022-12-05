@@ -61,7 +61,7 @@ var Commands = map[string]*Command{
 			{
 				Type: discordgo.ApplicationCommandOptionString,
 				Name: "query",
-				Description: "The song to play",
+				Description: "Song or playlist to play",
 				Required: true,
 			},
 		},
