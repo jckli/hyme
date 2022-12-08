@@ -138,6 +138,52 @@ func Pause(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot)
 	}
 }
 
+func Stop(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot) {
+	player := bot.Lavalink.ExistingPlayer(snowflake.MustParse(i.GuildID))
+	if player == nil {
+		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds: utils.ErrorEmbed("I am not currently playing anything."),
+			},
+		})
+		return
+	}
+	queue := bot.Players.Get(i.GuildID)
+	nextTrack, has := queue.Next()
+	if has {
+		err1 := player.Update(context.TODO(), lavalink.WithTrack(nextTrack))
+		err2 := player.Update(context.TODO(), lavalink.WithPaused(player.Paused()))
+		if err1 != nil || err2 != nil {
+			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Embeds: utils.ErrorEmbed("Error stopping the track."),
+				},
+			})
+			return
+		}
+	} else {
+		// skip the current track and stop player
+		err := player.Update(context.TODO(), lavalink.WithNullTrack())
+		if err != nil {
+			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Embeds: utils.ErrorEmbed("Error stopping the track."),
+				},
+			})
+			return
+		}
+	}
+	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Embeds: utils.SuccessEmbed("Stopped the player."),
+		},
+	})
+}
+
 func Disconnect(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot) {
 	player := bot.Lavalink.ExistingPlayer(snowflake.MustParse(i.GuildID))
 	if player == nil {

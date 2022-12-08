@@ -76,4 +76,9 @@ var Commands = map[string]*Command{
 		Type: discordgo.ChatApplicationCommand,
 		Description: "Pauses the player",
 	}, Pause),
+	"stop": New(&discordgo.ApplicationCommand{
+		Name: "stop",
+		Type: discordgo.ChatApplicationCommand,
+		Description: "Skips the current track and pauses the player",
+	}, Stop),
 }
