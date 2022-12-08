@@ -5,7 +5,6 @@ import (
 	"regexp"
 	"strconv"
 	"time"
-	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"github.com/disgoorg/disgolink/v2/disgolink"
 	"github.com/disgoorg/disgolink/v2/lavalink"
@@ -65,15 +64,16 @@ func PlayTrack(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.
 			}
 		},
 		func(tracks []lavalink.Track) {
-			s.FollowupMessageCreate(i.Interaction, true, &discordgo.WebhookParams{
-				Embeds: utils.SuccessEmbed("Playing track: [`"+ tracks[0].Info.Title +"`]("+ *tracks[0].Info.URI +")"),
-			})
-			fmt.Println(player.Track())
-			fmt.Println(tracks[0])
 			if player.Track() == nil {
 				toPlay = &tracks[0]
+				s.FollowupMessageCreate(i.Interaction, true, &discordgo.WebhookParams{
+					Embeds: utils.SuccessEmbed("Playing track: [`"+ tracks[0].Info.Title +"`]("+ *tracks[0].Info.URI +")"),
+				})
 			} else {
 				queue.Add(tracks[0])
+				s.FollowupMessageCreate(i.Interaction, true, &discordgo.WebhookParams{
+					Embeds: utils.SuccessEmbed("Adding track to queue: [`"+ tracks[0].Info.Title +"`]("+ *tracks[0].Info.URI +")"),
+				})
 			}
 		},
 		func() {
@@ -98,6 +98,44 @@ func PlayTrack(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.
 		return
 	}
 	player.Update(context.TODO(), lavalink.WithTrack(*toPlay))
+}
+
+func Pause(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot) {
+	player := bot.Lavalink.ExistingPlayer(snowflake.MustParse(i.GuildID))
+	if player == nil {
+		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds: utils.ErrorEmbed("I am not currently playing anything."),
+			},
+		})
+		return
+	}
+	err := player.Update(context.Background(), lavalink.WithPaused(!player.Paused()))
+	if err != nil {
+		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds: utils.ErrorEmbed("Error pausing/resuming the track."),
+			},
+		})
+		return
+	}
+	if player.Paused() {
+		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds: utils.SuccessEmbed("Paused the player."),
+			},
+		})
+	} else {
+		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds: utils.SuccessEmbed("Resumed the player with track: [`"+ player.Track().Info.Title +"`]("+ *player.Track().Info.URI +")"),
+			},
+		})
+	}
 }
 
 func Disconnect(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot) {

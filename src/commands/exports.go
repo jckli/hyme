@@ -71,4 +71,9 @@ var Commands = map[string]*Command{
 		Type: discordgo.ChatApplicationCommand,
 		Description: "Disconnect the bot from the voice channel",
 	}, Disconnect),
+	"pause": New(&discordgo.ApplicationCommand{
+		Name: "pause",
+		Type: discordgo.ChatApplicationCommand,
+		Description: "Pauses the player",
+	}, Pause),
 }
