@@ -122,7 +122,7 @@ func Pause(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot)
 		})
 		return
 	}
-	err := player.Update(context.Background(), lavalink.WithPaused(!player.Paused()))
+	err := player.Update(context.TODO(), lavalink.WithPaused(!player.Paused()))
 	if err != nil {
 		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
