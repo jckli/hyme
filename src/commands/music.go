@@ -2,9 +2,11 @@ package commands
 
 import (
 	"context"
+	"fmt"
 	"regexp"
 	"strconv"
 	"time"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/disgoorg/disgolink/v2/disgolink"
 	"github.com/disgoorg/disgolink/v2/lavalink"
@@ -220,6 +222,39 @@ func Disconnect(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Embeds: utils.SuccessEmbed("Disconnected from the voice channel."),
+		},
+	})
+}
+
+func Queue(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot) {
+	queue := bot.Players.Get(i.GuildID)
+	if queue == nil {
+		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds: utils.ErrorEmbed("I am not connected to a voice channel."),
+			},
+		})
+		return
+	}
+	if len(queue.Tracks) == 0 {
+		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds: utils.ErrorEmbed("The queue is empty."),
+			},
+		})
+		return
+	}
+	var description string
+	for i, track := range queue.Tracks {
+		description += fmt.Sprintf("%d. [`%s`](%s) [%s] \n", i+1, track.Info.Title, *track.Info.URI, utils.ConvertMilliToTime(int64(track.Info.Length)))
+	}
+
+	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Embeds: utils.SuccessEmbed("🔊 Queue `("+ strconv.Itoa(len(queue.Tracks)) +")`:\n"+ description),
 		},
 	})
 }
