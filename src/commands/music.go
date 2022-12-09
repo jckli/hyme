@@ -35,8 +35,16 @@ func PlayTrack(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.
 	if !urlPattern.MatchString(query) && !searchPattern.MatchString(query) {
 		query = lavalink.SearchTypeYoutube.Apply(query)
 	}
-
-	player := bot.Lavalink.Player(snowflake.MustParse(i.GuildID))
+	var player disgolink.Player
+	player = bot.Lavalink.ExistingPlayer(snowflake.MustParse(i.GuildID))
+	if player != nil {
+		curTrack := player.Track()
+		if curTrack != nil && player.Paused() {
+			player.Update(context.TODO(), lavalink.WithPaused(false))
+		}
+	} else {
+		player = bot.Lavalink.Player(snowflake.MustParse(i.GuildID))
+	}
 	queue := bot.Players.Get(i.GuildID)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -102,7 +110,8 @@ func PlayTrack(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.
 
 func Pause(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot) {
 	player := bot.Lavalink.ExistingPlayer(snowflake.MustParse(i.GuildID))
-	if player == nil {
+	track := player.Track()
+	if player == nil || track == nil {
 		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
@@ -140,7 +149,8 @@ func Pause(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot)
 
 func Stop(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot) {
 	player := bot.Lavalink.ExistingPlayer(snowflake.MustParse(i.GuildID))
-	if player == nil {
+	curTrack := player.Track()
+	if player == nil || curTrack == nil {
 		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
@@ -153,7 +163,7 @@ func Stop(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot) 
 	nextTrack, has := queue.Next()
 	if has {
 		err1 := player.Update(context.TODO(), lavalink.WithTrack(nextTrack))
-		err2 := player.Update(context.TODO(), lavalink.WithPaused(player.Paused()))
+		err2 := player.Update(context.TODO(), lavalink.WithPaused(true))
 		if err1 != nil || err2 != nil {
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -179,7 +189,7 @@ func Stop(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot) 
 	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Embeds: utils.SuccessEmbed("Stopped the player."),
+			Embeds: utils.SuccessEmbed("Skipped the current track and paused the player."),
 		},
 	})
 }
