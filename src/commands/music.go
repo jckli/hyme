@@ -53,13 +53,16 @@ func PlayTrack(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.
 	var toPlay *lavalink.Track
 	bot.Lavalink.BestNode().LoadTracks(ctx, query, disgolink.NewResultHandler(
 		func(track lavalink.Track) {
-			s.FollowupMessageCreate(i.Interaction, true, &discordgo.WebhookParams{
-				Embeds: utils.SuccessEmbed("Playing track: [`"+ track.Info.Title +"`]("+ *track.Info.URI +")"),
-			})
 			if player.Track() == nil {
 				toPlay = &track
+				s.FollowupMessageCreate(i.Interaction, true, &discordgo.WebhookParams{
+					Embeds: utils.SuccessEmbed("Playing track: [`"+ track.Info.Title +"`]("+ *track.Info.URI +")"),
+				})
 			} else {
 				queue.Add(track)
+				s.FollowupMessageCreate(i.Interaction, true, &discordgo.WebhookParams{
+					Embeds: utils.SuccessEmbed("Adding track to queue: [`"+ track.Info.Title +"`]("+ *track.Info.URI +")"),
+				})
 			}
 		},
 		func(playlist lavalink.Playlist) {
