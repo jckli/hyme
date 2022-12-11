@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strconv"
 	"time"
-
+	"math/rand"
 	"github.com/bwmarrin/discordgo"
 	"github.com/disgoorg/disgolink/v2/disgolink"
 	"github.com/disgoorg/disgolink/v2/lavalink"
@@ -258,6 +258,36 @@ func Queue(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot)
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Embeds: utils.SuccessEmbed("🔊 Queue `("+ strconv.Itoa(len(queue.Tracks)) +")`:\n"+ description),
+		},
+	})
+}
+
+func Shuffle(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot) {
+	queue := bot.Players.Get(i.GuildID)
+	if queue == nil {
+		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds: utils.ErrorEmbed("I am not connected to a voice channel."),
+			},
+		})
+		return
+	}
+	if len(queue.Tracks) == 0 {
+		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds: utils.ErrorEmbed("The queue is empty."),
+			},
+		})
+		return
+	}
+	
+	rand.Shuffle(len(queue.Tracks), func(i, j int) { queue.Tracks[i], queue.Tracks[j] = queue.Tracks[j], queue.Tracks[i] })
+	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Embeds: utils.SuccessEmbed("Shuffled the queue."),
 		},
 	})
 }

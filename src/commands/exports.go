@@ -86,4 +86,9 @@ var Commands = map[string]*Command{
 		Type: discordgo.ChatApplicationCommand,
 		Description: "Shows the current queue",
 	}, Queue),
+	"shuffle": New(&discordgo.ApplicationCommand{
+		Name: "shuffle",
+		Type: discordgo.ChatApplicationCommand,
+		Description: "Shuffles the queue",
+	}, Shuffle),
 }
