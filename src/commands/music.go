@@ -6,7 +6,6 @@ import (
 	"regexp"
 	"strconv"
 	"time"
-	"math/rand"
 	"github.com/bwmarrin/discordgo"
 	"github.com/disgoorg/disgolink/v2/disgolink"
 	"github.com/disgoorg/disgolink/v2/lavalink"
