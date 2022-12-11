@@ -6,6 +6,8 @@ import (
 	"github.com/jckli/hyme/src/music"
 	"github.com/jckli/hyme/src/commands"
 	_ "github.com/joho/godotenv/autoload"
+	"context"
+	"time"
 	"os"
 	"os/signal"
 	"syscall"
@@ -26,10 +28,14 @@ func main() {
 		},
 	}
 	session.AddHandler(func(s *discordgo.Session, e *discordgo.VoiceStateUpdate) {
-		music.OnVoiceStateUpdate(s, e, bot)
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		music.OnVoiceStateUpdate(ctx, s, e, bot)
 	})
 	session.AddHandler(func(s *discordgo.Session, e *discordgo.VoiceServerUpdate) {
-		music.OnVoiceServerUpdate(s, e, bot)
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		music.OnVoiceServerUpdate(ctx, s, e, bot)
 	})
 	session.AddHandler(ReadyEvent)
 	err = session.Open()

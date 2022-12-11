@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/bwmarrin/discordgo v0.26.1
-	github.com/disgoorg/disgolink/v2 v2.0.0-20221209090507-e8e3b508732c
+	github.com/disgoorg/disgolink/v2 v2.0.0-20221211005912-af4f60f5b3b4
 	github.com/disgoorg/log v1.2.0
 	github.com/disgoorg/snowflake/v2 v2.0.1
 	github.com/joho/godotenv v1.4.0
