@@ -5,12 +5,12 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/jckli/hyme/src/music"
 	"github.com/jckli/hyme/src/commands"
-	_ "github.com/joho/godotenv/autoload"
 	"context"
 	"time"
 	"os"
 	"os/signal"
 	"syscall"
+	_ "github.com/joho/godotenv/autoload"
 )
 
 func main() {
