@@ -22,4 +22,4 @@ func (p *PlayerManager) Get(guildId string) *Queue {
 
 func (p *PlayerManager) Remove(guildId string) {
 	delete(p.Queues, guildId)
-}
+}    

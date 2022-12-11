@@ -2,6 +2,7 @@ package music
 
 import (
 	"github.com/disgoorg/disgolink/v2/lavalink"
+	"math/rand"
 )
 
 type QueueType string
@@ -45,4 +46,10 @@ func (q *Queue) Next() (lavalink.Track, bool) {
 
 func (q *Queue) Clear() {
 	q.Tracks = make([]lavalink.Track, 0)
+}
+
+func (q *Queue) Shuffle() {
+	rand.Shuffle(len(q.Tracks), func(i, j int) {
+		q.Tracks[i], q.Tracks[j] = q.Tracks[j], q.Tracks[i]
+	})
 }

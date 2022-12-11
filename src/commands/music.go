@@ -115,8 +115,17 @@ func PlayTrack(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.
 
 func Pause(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot) {
 	player := bot.Lavalink.ExistingPlayer(snowflake.MustParse(i.GuildID))
-	track := player.Track()
-	if player == nil || track == nil {
+	if player == nil {
+		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds: utils.ErrorEmbed("I am not currently playing anything."),
+			},
+		})
+		return
+	}
+	curTrack := player.Track()
+	if curTrack == nil {
 		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
@@ -154,8 +163,17 @@ func Pause(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot)
 
 func Stop(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot) {
 	player := bot.Lavalink.ExistingPlayer(snowflake.MustParse(i.GuildID))
+	if player == nil {
+		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds: utils.ErrorEmbed("I am not currently playing anything."),
+			},
+		})
+		return
+	}
 	curTrack := player.Track()
-	if player == nil || curTrack == nil {
+	if curTrack == nil {
 		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
@@ -201,8 +219,17 @@ func Stop(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot) 
 
 func Skip(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot) {
 	player := bot.Lavalink.ExistingPlayer(snowflake.MustParse(i.GuildID))
+	if player == nil {
+		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds: utils.ErrorEmbed("I am not currently playing anything."),
+			},
+		})
+		return
+	}
 	curTrack := player.Track()
-	if player == nil || curTrack == nil {
+	if curTrack == nil {
 		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
@@ -324,8 +351,7 @@ func Shuffle(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bo
 		})
 		return
 	}
-	
-	rand.Shuffle(len(queue.Tracks), func(i, j int) { queue.Tracks[i], queue.Tracks[j] = queue.Tracks[j], queue.Tracks[i] })
+	queue.Shuffle()
 	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
