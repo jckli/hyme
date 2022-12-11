@@ -199,6 +199,48 @@ func Stop(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot) 
 	})
 }
 
+func Skip(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot) {
+	player := bot.Lavalink.ExistingPlayer(snowflake.MustParse(i.GuildID))
+	curTrack := player.Track()
+	if player == nil || curTrack == nil {
+		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds: utils.ErrorEmbed("I am not currently playing anything."),
+			},
+		})
+		return
+	}
+	queue := bot.Players.Get(i.GuildID)
+	nextTrack, has := queue.Next()
+	if has {
+		err := player.Update(context.TODO(), lavalink.WithTrack(nextTrack))
+		if err != nil {
+			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Embeds: utils.ErrorEmbed("Error skipping the track."),
+				},
+			})
+			return
+		}
+	} else {
+		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds: utils.ErrorEmbed("No song to skip to."),
+			},
+		})
+		return
+	}
+	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Embeds: utils.SuccessEmbed("Skipped the current track."),
+		},
+	})
+}
+
 func Disconnect(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot) {
 	player := bot.Lavalink.ExistingPlayer(snowflake.MustParse(i.GuildID))
 	if player == nil {

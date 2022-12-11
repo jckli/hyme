@@ -91,4 +91,9 @@ var Commands = map[string]*Command{
 		Type: discordgo.ChatApplicationCommand,
 		Description: "Shuffles the queue",
 	}, Shuffle),
+	"skip": New(&discordgo.ApplicationCommand{
+		Name: "skip",
+		Type: discordgo.ChatApplicationCommand,
+		Description: "Skips the current track",
+	}, Skip),
 }
