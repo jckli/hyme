@@ -1,3 +1,5 @@
+github.com/TopiSenpai/dgo-paginator v0.0.0-20220520183708-1fc2bd8d1506 h1:wYboA82IIhhvC7qpKlFZkjrnZgLd/xysDf/uQ3OAFZk=
+github.com/TopiSenpai/dgo-paginator v0.0.0-20220520183708-1fc2bd8d1506/go.mod h1:rvmrJIZUFiw29Anez78+QfXOTDe1Qmrb3OT86SLptkQ=
 github.com/bwmarrin/discordgo v0.26.1 h1:AIrM+g3cl+iYBr4yBxCBp9tD9jR3K7upEjl0d89FRkE=
 github.com/bwmarrin/discordgo v0.26.1/go.mod h1:NJZpH+1AfhIcyQsPeuBKsUtYrRnjkyu0kIVMCHkZtRY=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
