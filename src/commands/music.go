@@ -299,7 +299,7 @@ func Queue(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot)
 	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Embeds: utils.SuccessEmbed("🔊 Queue `("+ strconv.Itoa(len(queue.Tracks)) +")`:\n"+ description),
+			Embeds: utils.MainEmbed("🔊 Queue", description, "Tracks in queue: "+ strconv.Itoa(len(queue.Tracks)), s, i),
 		},
 	})
 }
