@@ -9,7 +9,7 @@ func ErrorEmbed(description string) []*discordgo.MessageEmbed {
 		{
 			Type: "rich",
 			Color: 0xff4f4f,
-			Description: "Error! " + description,
+			Description: description,
 		},
 	}
 	return embeds
