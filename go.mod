@@ -11,7 +11,6 @@ require (
 )
 
 require (
-	github.com/TopiSenpai/dgo-paginator v0.0.0-20220520183708-1fc2bd8d1506 // indirect
 	github.com/disgoorg/json v1.0.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	golang.org/x/crypto v0.0.0-20210421170649-83a5a9bb288b // indirect
