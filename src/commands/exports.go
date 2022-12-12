@@ -5,9 +5,10 @@ import (
 	"os"
 	"github.com/bwmarrin/discordgo"
 	"github.com/jckli/hyme/src/music"
+	"github.com/TopiSenpai/dgo-paginator"
 )
 
-type CommandHandler func(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot)
+type CommandHandler func(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot, manager *paginator.Manager)
 
 type Command struct {
 	Command 	*discordgo.ApplicationCommand
@@ -32,10 +33,10 @@ func DeleteCommands(s *discordgo.Session) {
 	}
 }
 
-func InteractionRecieved(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot) {
+func InteractionRecieved(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot, manager *paginator.Manager) {
 	for _, v := range Commands {
 		if i.ApplicationCommandData().Name == v.Command.Name {
-			v.Handler(s, i, bot)
+			v.Handler(s, i, bot, manager)
 		}
 	}
 }

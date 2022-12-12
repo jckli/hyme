@@ -12,6 +12,7 @@ import (
 	"github.com/disgoorg/snowflake/v2"
 	"github.com/jckli/hyme/src/music"
 	"github.com/jckli/hyme/src/utils"
+	"github.com/TopiSenpai/dgo-paginator"
 )
 
 var (
@@ -19,7 +20,7 @@ var (
 	searchPattern = regexp.MustCompile(`^(.{2})search:(.+)`)
 )
 
-func PlayTrack(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot) {
+func PlayTrack(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot, manager *paginator.Manager) {
 	// Defer the response, gives more time to process the command
 	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
@@ -112,7 +113,7 @@ func PlayTrack(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.
 	player.Update(context.TODO(), lavalink.WithTrack(*toPlay))
 }
 
-func Pause(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot) {
+func Pause(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot, manager *paginator.Manager) {
 	player := bot.Lavalink.ExistingPlayer(snowflake.MustParse(i.GuildID))
 	if player == nil {
 		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -160,7 +161,7 @@ func Pause(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot)
 	}
 }
 
-func Stop(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot) {
+func Stop(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot, manager *paginator.Manager) {
 	player := bot.Lavalink.ExistingPlayer(snowflake.MustParse(i.GuildID))
 	if player == nil {
 		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -216,7 +217,7 @@ func Stop(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot) 
 	})
 }
 
-func Skip(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot) {
+func Skip(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot, manager *paginator.Manager) {
 	player := bot.Lavalink.ExistingPlayer(snowflake.MustParse(i.GuildID))
 	if player == nil {
 		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -267,7 +268,7 @@ func Skip(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot) 
 	})
 }
 
-func Disconnect(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot) {
+func Disconnect(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot, manager *paginator.Manager) {
 	player := bot.Lavalink.ExistingPlayer(snowflake.MustParse(i.GuildID))
 	if player == nil {
 		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -297,7 +298,7 @@ func Disconnect(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music
 	})
 }
 
-func Queue(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot) {
+func Queue(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot, manager *paginator.Manager) {
 	queue := bot.Players.Get(i.GuildID)
 	if queue == nil {
 		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -330,7 +331,7 @@ func Queue(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot)
 	})
 }
 
-func Shuffle(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot) {
+func Shuffle(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot, manager *paginator.Manager) {
 	queue := bot.Players.Get(i.GuildID)
 	if queue == nil {
 		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{

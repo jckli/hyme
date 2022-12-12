@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
+	"github.com/TopiSenpai/dgo-paginator"
 	"github.com/jckli/hyme/src/music"
 	"github.com/jckli/hyme/src/commands"
 	"context"
@@ -37,6 +38,8 @@ func main() {
 		defer cancel()
 		music.OnVoiceServerUpdate(ctx, s, e, bot)
 	})
+	manager := paginator.NewManager()
+	session.AddHandler(manager.OnInteractionCreate)
 	session.AddHandler(ReadyEvent)
 	err = session.Open()
 	if err != nil {
@@ -46,7 +49,7 @@ func main() {
 	bot.Lavalink = music.InitLink(session, bot)
 	bot.RegisterNodes()
 	session.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		commands.InteractionRecieved(s, i, bot)
+		commands.InteractionRecieved(s, i, bot, manager)
 	})
 	commands.CreateCommands(session)
 	fmt.Println("Bot is running!")
