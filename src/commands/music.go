@@ -318,15 +318,57 @@ func Queue(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot,
 		})
 		return
 	}
+	if len(queue.Tracks) > 15 {
+		chunks := utils.Chunks(queue.Tracks, 15)
+		var descriptions []string
+		k := 1
+		for _, chunk := range chunks {
+			var description string
+			for _, track := range chunk {
+				description += fmt.Sprintf("%d. [`%s`](%s) [%s] \n", k, track.Info.Title, *track.Info.URI, utils.ConvertMilliToTime(int64(track.Info.Length)))
+				k++
+			}
+			descriptions = append(descriptions, description)
+		}
+		guild, _ := s.Guild(i.GuildID)
+		err := manager.CreateInteraction(s, i.Interaction, &paginator.Paginator{
+			PageFunc: func(page int, embed *discordgo.MessageEmbed) {
+				embed.Title = "🔊 Queue"
+				embed.Description = descriptions[page]
+				embed.Footer = &discordgo.MessageEmbedFooter{
+					Text: "Tracks in queue: "+ strconv.Itoa(len(queue.Tracks)),
+				}
+				embed.Color = 0xa4849a
+				embed.Author = &discordgo.MessageEmbedAuthor{
+					Name: guild.Name,
+					IconURL: guild.IconURL(),
+				}
+			},
+			MaxPages: len(descriptions),
+			ExpiryLastUsage: true,
+		}, false)
+		if err != nil {
+			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Embeds: utils.ErrorEmbed("Error creating paginator."),
+				},
+			})
+			return
+		}
+		return
+	}
+
 	var description string
 	for i, track := range queue.Tracks {
 		description += fmt.Sprintf("%d. [`%s`](%s) [%s] \n", i+1, track.Info.Title, *track.Info.URI, utils.ConvertMilliToTime(int64(track.Info.Length)))
 	}
-
 	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Embeds: utils.MainEmbed("🔊 Queue", description, "Tracks in queue: "+ strconv.Itoa(len(queue.Tracks)), s, i),
+			Embeds: []*discordgo.MessageEmbed{
+				utils.MainEmbed("🔊 Queue", description, "Tracks in queue: "+ strconv.Itoa(len(queue.Tracks)), s, i),
+			},
 		},
 	})
 }

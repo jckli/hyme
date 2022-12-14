@@ -26,22 +26,20 @@ func SuccessEmbed(description string) []*discordgo.MessageEmbed {
 	return embeds
 }
 
-func MainEmbed(title string, description string, footer string, s *discordgo.Session, i *discordgo.InteractionCreate) []*discordgo.MessageEmbed {
+func MainEmbed(title string, description string, footer string, s *discordgo.Session, i *discordgo.InteractionCreate) *discordgo.MessageEmbed {
 	guild, _ := s.Guild(i.GuildID)
-	embeds := []*discordgo.MessageEmbed{
-		{
-			Type: "rich",
-			Color: 0xa4849a,
-			Title: title,
-			Description: description,
-			Footer: &discordgo.MessageEmbedFooter{
-				Text: footer,
-			},
-			Author: &discordgo.MessageEmbedAuthor{
-				Name: guild.Name,
-				IconURL: guild.IconURL(),
-			},
+	embeds := discordgo.MessageEmbed{
+		Type: "rich",
+		Color: 0xa4849a,
+		Title: title,
+		Description: description,
+		Footer: &discordgo.MessageEmbedFooter{
+			Text: footer,
+		},
+		Author: &discordgo.MessageEmbedAuthor{
+			Name: guild.Name,
+			IconURL: guild.IconURL(),
 		},
 	}
-	return embeds
+	return &embeds
 }

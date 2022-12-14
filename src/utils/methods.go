@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
+	"github.com/disgoorg/disgolink/v2/lavalink"
 )
 
 func GetCurrentVoiceChannel(userId string, guild *discordgo.Guild, s *discordgo.Session) (channel *discordgo.Channel, err error) {
@@ -39,4 +40,16 @@ func ConvertMilliToTime(millis int64) string {
 	}
 
 	return result
+}
+
+func Chunks(arr []lavalink.Track, size int) [][]lavalink.Track {
+	var chunks [][]lavalink.Track
+	for i := 0; i < len(arr); i += size {
+		end := i + size
+		if end > len(arr) {
+			end = len(arr)
+		}
+		chunks = append(chunks, arr[i:end])
+	}
+	return chunks
 }
