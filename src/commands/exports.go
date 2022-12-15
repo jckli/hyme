@@ -100,4 +100,9 @@ var Commands = map[string]*Command{
 		Type: discordgo.ChatApplicationCommand,
 		Description: "Skips the current track",
 	}, Skip),
+	"hype": New(&discordgo.ApplicationCommand{
+		Name: "hype",
+		Type: discordgo.ChatApplicationCommand,
+		Description: "Auto-queues the HYPE!!!1!! playlist (a roulette playlist)",
+	}, HypePlaylist),
 }
