@@ -239,6 +239,39 @@ func Skip(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot, 
 		return
 	}
 	queue := bot.Players.Get(i.GuildID)
+	acd := i.ApplicationCommandData()
+	if acd.Options != nil {
+		if len(queue.Tracks) == 0 {
+			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Embeds: utils.ErrorEmbed("No song to skip to."),
+				},
+			})
+			return
+		}
+		to := acd.Options[0].IntValue()
+		trackTo := queue.Tracks[to-1]
+		queue.Tracks = queue.Tracks[to:]
+		err := player.Update(context.TODO(), lavalink.WithTrack(trackTo))
+		if err != nil {
+			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Embeds: utils.ErrorEmbed("Error skipping the track."),
+				},
+			})
+			return
+		}
+		track := player.Track()
+		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds: utils.SuccessEmbed(fmt.Sprintf("Skipped to track `%d`: [%s](%s)", to, track.Info.Title, *track.Info.URI)),
+			},
+		})
+		return
+	}
 	nextTrack, has := queue.Next()
 	if has {
 		err := player.Update(context.TODO(), lavalink.WithTrack(nextTrack))
@@ -404,6 +437,7 @@ func Shuffle(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bo
 		},
 	})
 }
+
 func NowPlaying(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot, manager *paginator.Manager) {
 	player := bot.Lavalink.ExistingPlayer(snowflake.MustParse(i.GuildID))
 	if player == nil {

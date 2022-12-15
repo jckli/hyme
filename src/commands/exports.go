@@ -99,6 +99,14 @@ var Commands = map[string]*Command{
 		Name: "skip",
 		Type: discordgo.ChatApplicationCommand,
 		Description: "Skips the current track",
+		Options: []*discordgo.ApplicationCommandOption{
+			{
+				Type: discordgo.ApplicationCommandOptionInteger,
+				Name: "to",
+				Description: "Track to skip to",
+				Required: false,
+			},
+		},
 	}, Skip),
 	"nowplaying": New(&discordgo.ApplicationCommand{
 		Name: "nowplaying",
