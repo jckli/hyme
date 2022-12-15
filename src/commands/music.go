@@ -289,7 +289,10 @@ func Disconnect(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music
 		})
 		return
 	}
+	player.Update(context.TODO(), lavalink.WithNullTrack())
 	bot.Lavalink.RemovePlayer(snowflake.MustParse(i.GuildID))
+	queue := bot.Players.Get(i.GuildID)
+	queue.Clear()
 	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
