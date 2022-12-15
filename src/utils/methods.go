@@ -53,3 +53,10 @@ func Chunks(arr []lavalink.Track, size int) [][]lavalink.Track {
 	}
 	return chunks
 }
+
+func FormatPosition(position lavalink.Duration) string {
+	if position == 0 {
+		return "0:00"
+	}
+	return fmt.Sprintf("%d:%02d", position.Minutes(), position.SecondsPart())
+}

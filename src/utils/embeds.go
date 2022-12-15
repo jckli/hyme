@@ -28,6 +28,19 @@ func SuccessEmbed(description string) []*discordgo.MessageEmbed {
 
 func MainEmbed(title string, description string, footer string, s *discordgo.Session, i *discordgo.InteractionCreate) *discordgo.MessageEmbed {
 	guild, _ := s.Guild(i.GuildID)
+	if footer == "" {
+		embeds := discordgo.MessageEmbed{
+			Type: "rich",
+			Color: 0xa4849a,
+			Title: title,
+			Description: description,
+			Author: &discordgo.MessageEmbedAuthor{
+				Name: guild.Name,
+				IconURL: guild.IconURL(),
+			},
+		}
+		return &embeds
+	}
 	embeds := discordgo.MessageEmbed{
 		Type: "rich",
 		Color: 0xa4849a,

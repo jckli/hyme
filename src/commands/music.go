@@ -404,3 +404,33 @@ func Shuffle(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bo
 		},
 	})
 }
+func NowPlaying(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot, manager *paginator.Manager) {
+	player := bot.Lavalink.ExistingPlayer(snowflake.MustParse(i.GuildID))
+	if player == nil {
+		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds: utils.ErrorEmbed("I am not currently playing anything."),
+			},
+		})
+		return
+	}
+	track := player.Track()
+	if track == nil {
+		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds: utils.ErrorEmbed("I am not currently playing anything."),
+			},
+		})
+		return
+	}
+	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Embeds: []*discordgo.MessageEmbed{
+				utils.MainEmbed("🎶 Now Playing", fmt.Sprintf("[%s](%s)\n%s / %s", track.Info.Title, *track.Info.URI, utils.FormatPosition(player.Position()), utils.FormatPosition(track.Info.Length)), "", s, i),
+			},
+		},
+	})
+}
