@@ -38,14 +38,14 @@ func main() {
 		defer cancel()
 		music.OnVoiceServerUpdate(ctx, s, e, bot)
 	})
-	manager := paginator.NewManager()
-	session.AddHandler(manager.OnInteractionCreate)
 	session.AddHandler(ReadyEvent)
 	err = session.Open()
 	if err != nil {
 		fmt.Println("Error opening connection: ", err)
 		return
 	}
+	manager := paginator.NewManager()
+	session.AddHandler(manager.OnInteractionCreate)
 	bot.Lavalink = music.InitLink(session, bot)
 	bot.RegisterNodes()
 	session.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
