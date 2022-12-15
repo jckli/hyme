@@ -34,6 +34,9 @@ func DeleteCommands(s *discordgo.Session) {
 }
 
 func InteractionRecieved(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot, manager *paginator.Manager) {
+	if i.Type != discordgo.InteractionApplicationCommand {
+		return
+	}
 	for _, v := range Commands {
 		if i.ApplicationCommandData().Name == v.Command.Name {
 			v.Handler(s, i, bot, manager)
