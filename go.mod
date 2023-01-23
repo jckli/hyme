@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/TopiSenpai/dgo-paginator v0.0.0-20221211223320-2605eeed42cb
 	github.com/bwmarrin/discordgo v0.26.1
-	github.com/disgoorg/disgolink/v2 v2.0.0-20221211005912-af4f60f5b3b4
+	github.com/disgoorg/disgolink/v2 v2.0.0-20230106214928-7ed92de9a445
 	github.com/disgoorg/log v1.2.0
 	github.com/disgoorg/snowflake/v2 v2.0.1
 	github.com/joho/godotenv v1.4.0

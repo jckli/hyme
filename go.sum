@@ -5,6 +5,8 @@ github.com/bwmarrin/discordgo v0.26.1/go.mod h1:NJZpH+1AfhIcyQsPeuBKsUtYrRnjkyu0
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/disgoorg/disgolink/v2 v2.0.0-20221211005912-af4f60f5b3b4 h1:BF7455SPtzcjPLmX9JTFpIrVtzeIFMnYkbYLeh0EUco=
 github.com/disgoorg/disgolink/v2 v2.0.0-20221211005912-af4f60f5b3b4/go.mod h1:SjTEe+frmRjTeFWNjmEc6rbAJiS4CK/5mrzrr7v97po=
+github.com/disgoorg/disgolink/v2 v2.0.0-20230106214928-7ed92de9a445 h1:+7+eWHvfItPbI+1EbdRTaNvO3yHqvnrJBlktN8C+qoY=
+github.com/disgoorg/disgolink/v2 v2.0.0-20230106214928-7ed92de9a445/go.mod h1:SjTEe+frmRjTeFWNjmEc6rbAJiS4CK/5mrzrr7v97po=
 github.com/disgoorg/json v1.0.0 h1:kDhSM661fgIuNoZF3BO5/odaR5NSq80AWb937DH+Pdo=
 github.com/disgoorg/json v1.0.0/go.mod h1:BHDwdde0rpQFDVsRLKhma6Y7fTbQKub/zdGO5O9NqqA=
 github.com/disgoorg/log v1.2.0 h1:sqlXnu/ZKAlIlHV9IO+dbMto7/hCQ474vlIdMWk8QKo=
