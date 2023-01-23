@@ -1,6 +1,7 @@
 package music
 
 import (
+	"context"
 	"github.com/disgoorg/disgolink/v2/lavalink"
 	"math/rand"
 )
@@ -10,6 +11,7 @@ type QueueType string
 type Queue struct {
 	Tracks []lavalink.Track
 	Type   QueueType
+	Cancel context.CancelFunc
 }
 
 const (

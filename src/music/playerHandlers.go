@@ -3,6 +3,8 @@ package music
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/disgoorg/disgolink/v2/disgolink"
 	"github.com/disgoorg/disgolink/v2/lavalink"
 	"github.com/disgoorg/log"
@@ -18,6 +20,8 @@ func (b *Bot) onPlayerResume(player disgolink.Player, event lavalink.PlayerResum
 
 func (b *Bot) onTrackStart(player disgolink.Player, event lavalink.TrackStartEvent) {
 	fmt.Printf("onTrackStart: %v\n", event)
+	queue := b.Players.Get(event.GuildID().String())
+	queue.Cancel()
 }
 
 func (b *Bot) onTrackEnd(player disgolink.Player, event lavalink.TrackEndEvent) {
@@ -51,6 +55,15 @@ func (b *Bot) onTrackEnd(player disgolink.Player, event lavalink.TrackEndEvent) 
 	if err := player.Update(context.TODO(), lavalink.WithTrack(nextTrack)); err != nil {
 		log.Error("Failed to play next track: ", err)
 	}
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+		queue.Cancel = cancel
+		defer cancel()
+		<- ctx.Done()
+		if ctx.Err() == context.DeadlineExceeded {
+			b.Session.ChannelVoiceJoinManual(event.GuildID().String(), "", false, false)
+		}
+	}()
 }
 
 func (b *Bot) onTrackException(player disgolink.Player, event lavalink.TrackExceptionEvent) {
