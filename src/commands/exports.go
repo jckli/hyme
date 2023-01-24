@@ -57,6 +57,11 @@ var Commands = map[string]*Command{
 		Type: discordgo.ChatApplicationCommand,
 		Description: "Pong!",
 	}, Ping),
+	"hyme": New(&discordgo.ApplicationCommand{
+		Name: "hyme",
+		Type: discordgo.ChatApplicationCommand,
+		Description: "Basic information about Hyme",
+	}, Info),
 	"play": New(&discordgo.ApplicationCommand{
 		Name: "play",
 		Type: discordgo.ChatApplicationCommand,

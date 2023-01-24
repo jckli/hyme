@@ -66,7 +66,6 @@ func (b *Bot) onTrackEnd(player disgolink.Player, event lavalink.TrackEndEvent) 
 	if !event.Reason.MayStartNext() {
 		return
 	}
-
 	
 	var (
 		nextTrack lavalink.Track
