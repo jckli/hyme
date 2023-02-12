@@ -15,7 +15,7 @@ func (b *Bot) onPlayerPause(player disgolink.Player, event lavalink.PlayerPauseE
 	fmt.Printf("onPlayerPause: %v\n", event)
 	queue := b.Players.Get(event.GuildID().String())
 	go func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
 		fmt.Println("Started timeout")
 		queue.Cancel = cancel
 		defer cancel()
@@ -55,7 +55,7 @@ func (b *Bot) onTrackEnd(player disgolink.Player, event lavalink.TrackEndEvent) 
 
 	queue := b.Players.Get(event.GuildID().String())
 	go func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 		fmt.Println("Started timeout")
 		queue.Cancel = cancel
 		defer cancel()
