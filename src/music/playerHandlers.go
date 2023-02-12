@@ -15,11 +15,13 @@ func (b *Bot) onPlayerPause(player disgolink.Player, event lavalink.PlayerPauseE
 	fmt.Printf("onPlayerPause: %v\n", event)
 	queue := b.Players.Get(event.GuildID().String())
 	go func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		fmt.Println("Started timeout")
 		queue.Cancel = cancel
 		defer cancel()
 		<- ctx.Done()
 		if ctx.Err() == context.DeadlineExceeded {
+			fmt.Println("DeadlineExceeded")
 			player := b.Lavalink.ExistingPlayer(snowflake.MustParse(event.GuildID().String()))
 			player.Update(context.TODO(), lavalink.WithNullTrack())
 			b.Session.ChannelVoiceJoinManual(event.GuildID().String(), "", false, false)
@@ -40,7 +42,9 @@ func (b *Bot) onPlayerResume(player disgolink.Player, event lavalink.PlayerResum
 func (b *Bot) onTrackStart(player disgolink.Player, event lavalink.TrackStartEvent) {
 	fmt.Printf("onTrackStart: %v\n", event)
 	queue := b.Players.Get(event.GuildID().String())
+	fmt.Println(queue.Cancel)
 	if queue.Cancel != nil {
+		fmt.Println("Cancel auto disconnect")
 		queue.Cancel()
 	}
 }
@@ -50,11 +54,13 @@ func (b *Bot) onTrackEnd(player disgolink.Player, event lavalink.TrackEndEvent) 
 
 	queue := b.Players.Get(event.GuildID().String())
 	go func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+		ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
+		fmt.Println("Started timeout")
 		queue.Cancel = cancel
 		defer cancel()
 		<- ctx.Done()
 		if ctx.Err() == context.DeadlineExceeded {
+			fmt.Println("DeadlineExceeded")
 			player := b.Lavalink.ExistingPlayer(snowflake.MustParse(event.GuildID().String()))
 			player.Update(context.TODO(), lavalink.WithNullTrack())
 			b.Session.ChannelVoiceJoinManual(event.GuildID().String(), "", false, false)

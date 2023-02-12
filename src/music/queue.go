@@ -55,3 +55,13 @@ func (q *Queue) Shuffle() {
 		q.Tracks[i], q.Tracks[j] = q.Tracks[j], q.Tracks[i]
 	})
 }
+
+func (q *Queue) Remove(index int) {
+	q.Tracks = append(q.Tracks[:index], q.Tracks[index+1:]...)
+}
+
+func (q *Queue) Move(from, to int) {
+	track := q.Tracks[from]
+	q.Tracks = append(q.Tracks[:from], q.Tracks[from+1:]...)
+	q.Tracks = append(q.Tracks[:to], append([]lavalink.Track{track}, q.Tracks[to:]...)...)
+}

@@ -253,8 +253,18 @@ func Skip(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot, 
 		to := acd.Options[0].IntValue()
 		trackTo := queue.Tracks[to-1]
 		queue.Tracks = queue.Tracks[to:]
-		err := player.Update(context.TODO(), lavalink.WithTrack(trackTo))
-		if err != nil {
+		err1 := player.Update(context.TODO(), lavalink.WithNullTrack())
+		if err1 != nil {
+			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Embeds: utils.ErrorEmbed("Error stopping the track."),
+				},
+			})
+			return
+		}
+		err2 := player.Update(context.TODO(), lavalink.WithTrack(trackTo))
+		if err2 != nil {
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
@@ -274,8 +284,18 @@ func Skip(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot, 
 	}
 	nextTrack, has := queue.Next()
 	if has {
-		err := player.Update(context.TODO(), lavalink.WithTrack(nextTrack))
-		if err != nil {
+		err1 := player.Update(context.TODO(), lavalink.WithNullTrack())
+		if err1 != nil {
+			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Embeds: utils.ErrorEmbed("Error stopping the track."),
+				},
+			})
+			return
+		}
+		err2 := player.Update(context.TODO(), lavalink.WithTrack(nextTrack))
+		if err2 != nil {
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
@@ -323,9 +343,12 @@ func Disconnect(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music
 		return
 	}
 	player.Update(context.TODO(), lavalink.WithNullTrack())
-	bot.Lavalink.RemovePlayer(snowflake.MustParse(i.GuildID))
 	queue := bot.Players.Get(i.GuildID)
+	if queue.Cancel != nil {
+		queue.Cancel()
+	}
 	queue.Clear()
+	bot.Lavalink.RemovePlayer(snowflake.MustParse(i.GuildID))
 	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
@@ -465,6 +488,97 @@ func NowPlaying(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music
 			Embeds: []*discordgo.MessageEmbed{
 				utils.MainEmbed("🎶 Now Playing", fmt.Sprintf("[%s](%s)\n%s / %s", track.Info.Title, *track.Info.URI, utils.FormatPosition(player.Position()), utils.FormatPosition(track.Info.Length)), "", s, i),
 			},
+		},
+	})
+}
+
+func Move(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot, manager *paginator.Manager) {
+	queue := bot.Players.Get(i.GuildID)
+	if queue == nil {
+		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds: utils.ErrorEmbed("I am not connected to a voice channel."),
+			},
+		})
+		return
+	}
+	if len(queue.Tracks) == 0 {
+		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds: utils.ErrorEmbed("The queue is empty."),
+			},
+		})
+		return
+	}
+	acd := i.ApplicationCommandData()
+	from := acd.Options[0].IntValue()
+	to := acd.Options[1].IntValue()
+	if from < 1 || from > int64(len(queue.Tracks)) {
+		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds: utils.ErrorEmbed("Invalid from position."),
+			},
+		})
+		return
+	}
+	if to < 1 || to > int64(len(queue.Tracks)) {
+		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds: utils.ErrorEmbed("Invalid to position."),
+			},
+		})
+		return
+	}
+	fmt.Println(from, to)
+	queue.Move(int(from-1), int(to-1))
+	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Embeds: utils.SuccessEmbed("Moved the track."),
+		},
+	})
+}
+
+func Remove(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot, manager *paginator.Manager) {
+	queue := bot.Players.Get(i.GuildID)
+	if queue == nil {
+		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds: utils.ErrorEmbed("I am not connected to a voice channel."),
+			},
+		})
+		return
+	}
+	if len(queue.Tracks) == 0 {
+		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds: utils.ErrorEmbed("The queue is empty."),
+			},
+		})
+		return
+	}
+	acd := i.ApplicationCommandData()
+	pos := acd.Options[0].IntValue()
+	if pos < 1 || pos > int64(len(queue.Tracks)) {
+		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds: utils.ErrorEmbed("Invalid position."),
+			},
+		})
+		return
+	}
+	queue.Remove(int(pos - 1))
+	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Embeds: utils.SuccessEmbed("Removed the track."),
 		},
 	})
 }

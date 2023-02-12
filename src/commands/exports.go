@@ -118,6 +118,38 @@ var Commands = map[string]*Command{
 		Type: discordgo.ChatApplicationCommand,
 		Description: "Shows the currently playing track",
 	}, NowPlaying),
+	"move": New(&discordgo.ApplicationCommand{
+		Name: "move",
+		Type: discordgo.ChatApplicationCommand,
+		Description: "Moves a track in the queue",
+		Options: []*discordgo.ApplicationCommandOption{
+			{
+				Type: discordgo.ApplicationCommandOptionInteger,
+				Name: "from",
+				Description: "Track to move",
+				Required: true,
+			},
+			{
+				Type: discordgo.ApplicationCommandOptionInteger,
+				Name: "to",
+				Description: "Track to move to",
+				Required: true,
+			},
+		},
+	}, Move),
+	"remove": New(&discordgo.ApplicationCommand{
+		Name: "remove",
+		Type: discordgo.ChatApplicationCommand,
+		Description: "Removes a track from the queue",
+		Options: []*discordgo.ApplicationCommandOption{
+			{
+				Type: discordgo.ApplicationCommandOptionInteger,
+				Name: "track",
+				Description: "Track to remove",
+				Required: true,
+			},
+		},
+	}, Remove),
 	"hype": New(&discordgo.ApplicationCommand{
 		Name: "hype",
 		Type: discordgo.ChatApplicationCommand,
