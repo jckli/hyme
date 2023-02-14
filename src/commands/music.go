@@ -357,6 +357,30 @@ func Disconnect(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music
 	})
 }
 
+func Connect(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot, manager *paginator.Manager) {
+	userid := i.Member.User.ID
+	voiceState, err := bot.Session.State.VoiceState(i.GuildID, userid)
+	if err != nil {
+		s.FollowupMessageCreate(i.Interaction, true, &discordgo.WebhookParams{
+			Embeds: utils.ErrorEmbed("You are not in a voice channel. Please join one and try again."),
+		})
+		return
+	}
+	err2 := bot.Session.ChannelVoiceJoinManual(i.GuildID, voiceState.ChannelID, false, true)
+	if err2 != nil {
+		s.FollowupMessageCreate(i.Interaction, true, &discordgo.WebhookParams{
+			Embeds: utils.ErrorEmbed("Couldn't join the voice channel."),
+		})
+		return
+	}
+	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Embeds: utils.SuccessEmbed("Connected to the voice channel."),
+		},
+	})
+}
+
 func Queue(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot, manager *paginator.Manager) {
 	queue := bot.Players.Get(i.GuildID)
 	if queue == nil {
