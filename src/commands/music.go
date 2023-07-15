@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"time"
 	"github.com/bwmarrin/discordgo"
-	"github.com/disgoorg/disgolink/v2/disgolink"
-	"github.com/disgoorg/disgolink/v2/lavalink"
+	"github.com/disgoorg/disgolink/v3/disgolink"
+	"github.com/disgoorg/disgolink/v3/lavalink"
 	"github.com/disgoorg/snowflake/v2"
 	"github.com/jckli/hyme/src/music"
 	"github.com/jckli/hyme/src/utils"
@@ -35,7 +35,7 @@ func PlayTrack(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.
 	}
 	query := i.ApplicationCommandData().Options[0].StringValue()
 	if !urlPattern.MatchString(query) && !searchPattern.MatchString(query) {
-		query = lavalink.SearchTypeYoutube.Apply(query)
+		query = lavalink.SearchTypeYouTube.Apply(query)
 	}
 	var player disgolink.Player
 	player = bot.Lavalink.ExistingPlayer(snowflake.MustParse(i.GuildID))
@@ -51,7 +51,7 @@ func PlayTrack(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	var toPlay *lavalink.Track
-	bot.Lavalink.BestNode().LoadTracks(ctx, query, disgolink.NewResultHandler(
+	bot.Lavalink.BestNode().LoadTracksHandler(ctx, query, disgolink.NewResultHandler(
 		func(track lavalink.Track) {
 			if player.Track() == nil {
 				toPlay = &track
@@ -353,30 +353,6 @@ func Disconnect(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Embeds: utils.SuccessEmbed("Disconnected from the voice channel."),
-		},
-	})
-}
-
-func Connect(s *discordgo.Session, i *discordgo.InteractionCreate, bot *music.Bot, manager *paginator.Manager) {
-	userid := i.Member.User.ID
-	voiceState, err := bot.Session.State.VoiceState(i.GuildID, userid)
-	if err != nil {
-		s.FollowupMessageCreate(i.Interaction, true, &discordgo.WebhookParams{
-			Embeds: utils.ErrorEmbed("You are not in a voice channel. Please join one and try again."),
-		})
-		return
-	}
-	err2 := bot.Session.ChannelVoiceJoinManual(i.GuildID, voiceState.ChannelID, false, true)
-	if err2 != nil {
-		s.FollowupMessageCreate(i.Interaction, true, &discordgo.WebhookParams{
-			Embeds: utils.ErrorEmbed("Couldn't join the voice channel."),
-		})
-		return
-	}
-	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Embeds: utils.SuccessEmbed("Connected to the voice channel."),
 		},
 	})
 }

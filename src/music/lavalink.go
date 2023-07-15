@@ -6,7 +6,7 @@ import (
 	"os"
 	"strconv"
 	"github.com/bwmarrin/discordgo"
-	"github.com/disgoorg/disgolink/v2/disgolink"
+	"github.com/disgoorg/disgolink/v3/disgolink"
 	"github.com/disgoorg/snowflake/v2"
 )
 

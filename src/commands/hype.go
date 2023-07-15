@@ -3,8 +3,8 @@ package commands
 import (
 	"context"
 	"github.com/bwmarrin/discordgo"
-	"github.com/disgoorg/disgolink/v2/disgolink"
-	"github.com/disgoorg/disgolink/v2/lavalink"
+	"github.com/disgoorg/disgolink/v3/disgolink"
+	"github.com/disgoorg/disgolink/v3/lavalink"
 	"github.com/disgoorg/snowflake/v2"
 	"github.com/TopiSenpai/dgo-paginator"
 	"github.com/jckli/hyme/src/music"
@@ -40,7 +40,7 @@ func HypePlaylist(s *discordgo.Session, i *discordgo.InteractionCreate, bot *mus
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	var toPlay *lavalink.Track
-	bot.Lavalink.BestNode().LoadTracks(ctx, "https://open.spotify.com/playlist/5O1zB17DBI71eThy3IzXfP?si=6c4b3a3d6aa4412e", disgolink.NewResultHandler(
+	bot.Lavalink.BestNode().LoadTracksHandler(ctx, "https://open.spotify.com/playlist/5O1zB17DBI71eThy3IzXfP?si=6c4b3a3d6aa4412e", disgolink.NewResultHandler(
 		func(track lavalink.Track) {},
 		func(playlist lavalink.Playlist) {
 			rand.Shuffle(len(playlist.Tracks), func(i, j int) {

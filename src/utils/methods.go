@@ -3,7 +3,7 @@ package utils
 import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
-	"github.com/disgoorg/disgolink/v2/lavalink"
+	"github.com/disgoorg/disgolink/v3/lavalink"
 )
 
 func GetCurrentVoiceChannel(userId string, guild *discordgo.Guild, s *discordgo.Session) (channel *discordgo.Channel, err error) {

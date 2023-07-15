@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/disgoorg/disgolink/v2/disgolink"
-	"github.com/disgoorg/disgolink/v2/lavalink"
+	"github.com/disgoorg/disgolink/v3/disgolink"
+	"github.com/disgoorg/disgolink/v3/lavalink"
 	"github.com/disgoorg/snowflake/v2"
 	"github.com/disgoorg/log"
 )
@@ -87,7 +87,7 @@ func (b *Bot) onTrackEnd(player disgolink.Player, event lavalink.TrackEndEvent) 
 		nextTrack = *player.Track()
 
 	case QueueTypeRepeatQueue:
-		lastTrack, _ := b.Lavalink.BestNode().DecodeTrack(context.TODO(), event.EncodedTrack)
+		lastTrack, _ := b.Lavalink.BestNode().DecodeTrack(context.TODO(), event.Track.Encoded)
 		queue.Add(*lastTrack)
 		nextTrack, ok = queue.Next()
 	}

@@ -2,7 +2,7 @@ package music
 
 import (
 	"context"
-	"github.com/disgoorg/disgolink/v2/lavalink"
+	"github.com/disgoorg/disgolink/v3/lavalink"
 	"math/rand"
 )
 
