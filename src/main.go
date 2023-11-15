@@ -3,12 +3,18 @@ package main
 import (
 	"context"
 	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
+	"time"
+
+	"github.com/jckli/hyme/src/commands"
 
 	"github.com/disgoorg/disgo"
 	"github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/cache"
 	"github.com/disgoorg/disgo/discord"
+	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/disgo/gateway"
 	"github.com/disgoorg/log"
 	"github.com/disgoorg/paginator"
@@ -48,7 +54,6 @@ func New(version string) *Bot {
 			DevServerID: snowflake.ID(devServerID),
 		},
 	}
-
 }
 
 func (b *Bot) Setup(listeners ...bot.EventListener) {
@@ -72,8 +77,7 @@ func (b *Bot) Setup(listeners ...bot.EventListener) {
 
 }
 
-func (b *Bot) ReadyEvent() {
-	b.Logger.Info("Bot is ready!")
+func (b *Bot) ReadyEvent(_ *events.Ready) {
 	err := b.Client.SetPresence(
 		context.TODO(),
 		gateway.WithListeningActivity("HYPE!!!1!!"),
@@ -82,15 +86,31 @@ func (b *Bot) ReadyEvent() {
 	if err != nil {
 		b.Logger.Error("Error while setting presence: ", err)
 	}
+
+	b.Logger.Info("Set bot presence successfully.")
 }
 
 func main() {
 	hyme := New("v0.0.1")
 
+	h := commands.Commands()
+
 	hyme.Setup(
-		bot.NewListenerFunc(, hyme.ReadyEvent),
+		h,
+		bot.NewListenerFunc(hyme.ReadyEvent),
 	)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	err := hyme.Client.OpenGateway(ctx)
 	if err != nil {
-		bot.Logger.Fatal("Error while connecting: ", err)
+		hyme.Logger.Fatal("Error while connecting: ", err)
 	}
+	defer hyme.Client.Close(context.TODO())
+
+	hyme.Logger.Info("Bot is ready!")
+	s := make(chan os.Signal, 1)
+	signal.Notify(s, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
+	<-s
+	hyme.Logger.Info("Shutting down...")
 }
