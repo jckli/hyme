@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/jckli/hyme/src/commands"
+	"github.com/jckli/hyme/src/music"
 
 	"github.com/disgoorg/disgo"
 	"github.com/disgoorg/disgo/bot"
@@ -35,6 +36,7 @@ type Bot struct {
 	Paginator *paginator.Manager
 	Config    Config
 	Client    bot.Client
+	Music     *music.MusicBot
 }
 
 func New(version string) *Bot {
@@ -87,22 +89,40 @@ func (b *Bot) ReadyEvent(_ *events.Ready) {
 		b.Logger.Error("Error while setting presence: ", err)
 	}
 
-	b.Logger.Info("Set bot presence successfully.")
+	b.Logger.Info("Bot presence set successfully.")
 }
 
 func main() {
 	hyme := New("v0.0.1")
 
-	h := commands.Commands()
+	h := commands.CommandHandlers()
 
 	hyme.Setup(
 		h,
 		bot.NewListenerFunc(hyme.ReadyEvent),
 	)
 
+	var err error
+	if hyme.Config.DevMode {
+		hyme.Logger.Info(
+			"Running in dev mode. Syncing commands to server ID: ",
+			hyme.Config.DevServerID,
+		)
+		_, err = hyme.Client.Rest().
+			SetGuildCommands(hyme.Client.ApplicationID(), hyme.Config.DevServerID, commands.CommandList)
+	} else {
+		hyme.Logger.Info(
+			"Running in global mode. Syncing commands globally.",
+		)
+		_, err = hyme.Client.Rest().SetGlobalCommands(hyme.Client.ApplicationID(), commands.CommandList)
+	}
+	if err != nil {
+		hyme.Logger.Errorf("Failed to sync commands: %s", err.Error())
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	err := hyme.Client.OpenGateway(ctx)
+	err = hyme.Client.OpenGateway(ctx)
 	if err != nil {
 		hyme.Logger.Fatal("Error while connecting: ", err)
 	}

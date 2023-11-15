@@ -3,7 +3,8 @@ module github.com/jckli/hyme
 go 1.21
 
 require (
-	github.com/disgoorg/disgo v0.16.11 // indirect
+	github.com/disgoorg/disgo v0.16.12 // indirect
+	github.com/disgoorg/disgolink/v3 v3.0.0-20230810103102-c572e085fba1 // indirect
 	github.com/disgoorg/json v1.1.0 // indirect
 	github.com/disgoorg/log v1.2.1 // indirect
 	github.com/disgoorg/paginator v0.0.0-20230104145353-f988d828ede9 // indirect

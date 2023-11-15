@@ -5,7 +5,12 @@ import (
 	"github.com/disgoorg/disgo/handler"
 )
 
-func HandlePing(e *handler.CommandEvent) error {
+var pingCommand = discord.SlashCommandCreate{
+	Name:        "ping",
+	Description: "Pong!",
+}
+
+func PingHandler(e *handler.CommandEvent) error {
 	var ping string
 	if e.Client().HasGateway() {
 		ping = e.Client().Gateway().Latency().String()
