@@ -6,6 +6,7 @@ import (
 	"github.com/disgoorg/disgolink/v3/disgolink"
 	"github.com/disgoorg/disgolink/v3/lavalink"
 	"github.com/disgoorg/log"
+	"github.com/disgoorg/snowflake/v2"
 	"os"
 	"strconv"
 )
@@ -15,6 +16,22 @@ type Music struct {
 	MusicLogger log.Logger
 	Lavalink    disgolink.Client
 	Players     *PlayerManager
+}
+
+func CreateMusic(client bot.Client) *Music {
+	music := &Music{
+		Client: client,
+	}
+
+	logger := log.New(log.Ldate | log.Ltime | log.Lshortfile)
+	logger.SetLevel(1)
+	music.MusicLogger = logger
+
+	music.Lavalink = InitLink(music)
+	music.Players = &PlayerManager{
+		Queues: make(map[snowflake.ID]*Queue),
+	}
+	return music
 }
 
 func InitLink(b *Music) disgolink.Client {
@@ -68,7 +85,7 @@ func InitLink(b *Music) disgolink.Client {
 
 func RegisterNodes(ctx context.Context, b *Music) disgolink.Node {
 	logger := log.New(log.Ldate | log.Ltime | log.Lshortfile)
-	logger.SetLevel(1)
+	logger.SetLevel(2)
 	b.MusicLogger = logger
 
 	secure, _ := strconv.ParseBool(os.Getenv("LAVALINK_SECURE"))

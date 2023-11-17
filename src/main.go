@@ -10,6 +10,7 @@ import (
 	"github.com/disgoorg/disgo/bot"
 	"github.com/jckli/hyme/src/commands"
 	"github.com/jckli/hyme/src/dbot"
+	"github.com/jckli/hyme/src/music"
 
 	_ "github.com/joho/godotenv/autoload"
 )
@@ -23,6 +24,8 @@ func main() {
 		h,
 		bot.NewListenerFunc(hyme.ReadyEvent),
 	)
+
+	hyme.Music = music.CreateMusic(client)
 
 	var err error
 	if hyme.Config.DevMode {
@@ -49,6 +52,8 @@ func main() {
 		hyme.Logger.Fatal("Error while connecting: ", err)
 	}
 	defer client.Close(context.TODO())
+
+	music.RegisterNodes(ctx, hyme.Music)
 
 	hyme.Logger.Info("Bot is ready!")
 	s := make(chan os.Signal, 1)

@@ -69,8 +69,6 @@ func (b *Bot) Setup(listeners ...bot.EventListener) bot.Client {
 		b.Logger.Fatal("Error while building DisGo client: ", err)
 	}
 
-	b.Music.Client = client
-
 	return client
 
 }
