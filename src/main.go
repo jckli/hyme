@@ -18,7 +18,7 @@ import (
 func main() {
 	hyme := dbot.New("v0.0.1")
 
-	h := commands.CommandHandlers()
+	h := commands.CommandHandlers(hyme)
 
 	client := hyme.Setup(
 		h,

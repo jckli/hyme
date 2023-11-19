@@ -3,6 +3,7 @@ package commands
 import (
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/handler"
+	"github.com/jckli/hyme/src/dbot"
 )
 
 var CommandList = []discord.ApplicationCommandCreate{
@@ -10,7 +11,7 @@ var CommandList = []discord.ApplicationCommandCreate{
 	infoCommand,
 }
 
-func CommandHandlers() *handler.Mux {
+func CommandHandlers(b *dbot.Bot) *handler.Mux {
 	h := handler.New()
 
 	h.Command("/ping", PingHandler)
