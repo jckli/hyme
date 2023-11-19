@@ -7,12 +7,14 @@ import (
 
 var CommandList = []discord.ApplicationCommandCreate{
 	pingCommand,
+	infoCommand,
 }
 
 func CommandHandlers() *handler.Mux {
 	h := handler.New()
 
 	h.Command("/ping", PingHandler)
+	h.Command("/hyme", InfoHandler)
 
 	return h
 }

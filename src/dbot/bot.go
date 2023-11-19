@@ -58,12 +58,15 @@ func (b *Bot) Setup(listeners ...bot.EventListener) bot.Client {
 		bot.WithGatewayConfigOpts(
 			gateway.WithIntents(
 				gateway.IntentGuilds,
+				gateway.IntentGuildMembers,
 				gateway.IntentGuildVoiceStates,
 			),
 		),
 		bot.WithEventListeners(listeners...),
 		bot.WithEventListeners(b.Paginator),
-		bot.WithCacheConfigOpts(cache.WithCaches(cache.FlagVoiceStates)),
+		bot.WithCacheConfigOpts(
+			cache.WithCaches(cache.FlagVoiceStates, cache.FlagGuilds),
+		),
 	)
 	if err != nil {
 		b.Logger.Fatal("Error while building DisGo client: ", err)
