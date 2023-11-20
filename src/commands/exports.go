@@ -9,6 +9,7 @@ import (
 var CommandList = []discord.ApplicationCommandCreate{
 	pingCommand,
 	infoCommand,
+	playCommand,
 }
 
 func CommandHandlers(b *dbot.Bot) *handler.Mux {
@@ -16,6 +17,10 @@ func CommandHandlers(b *dbot.Bot) *handler.Mux {
 
 	h.Command("/ping", PingHandler)
 	h.Command("/hyme", InfoHandler)
+
+	h.Command("/play", func(e *handler.CommandEvent) error {
+		return playHandler(e, b)
+	})
 
 	return h
 }
