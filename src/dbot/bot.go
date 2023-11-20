@@ -62,6 +62,8 @@ func (b *Bot) Setup(listeners ...bot.EventListener) bot.Client {
 				gateway.IntentGuildVoiceStates,
 			),
 		),
+		bot.WithEventListenerFunc(b.onVoiceStateUpdate),
+		bot.WithEventListenerFunc(b.onVoiceServerUpdate),
 		bot.WithEventListeners(listeners...),
 		bot.WithEventListeners(b.Paginator),
 		bot.WithCacheConfigOpts(
@@ -87,4 +89,28 @@ func (b *Bot) ReadyEvent(_ *events.Ready) {
 	}
 
 	b.Logger.Info("Bot presence set successfully.")
+}
+
+func (b *Bot) onVoiceStateUpdate(event *events.GuildVoiceStateUpdate) {
+	if event.VoiceState.UserID != b.Music.Client.ApplicationID() {
+		return
+	}
+	b.Music.Lavalink.OnVoiceStateUpdate(
+		context.TODO(),
+		event.VoiceState.GuildID,
+		event.VoiceState.ChannelID,
+		event.VoiceState.SessionID,
+	)
+	if event.VoiceState.ChannelID == nil {
+		b.Music.Players.Delete(event.VoiceState.GuildID)
+	}
+}
+
+func (b *Bot) onVoiceServerUpdate(event *events.VoiceServerUpdate) {
+	b.Music.Lavalink.OnVoiceServerUpdate(
+		context.TODO(),
+		event.GuildID,
+		event.Token,
+		*event.Endpoint,
+	)
 }
