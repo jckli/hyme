@@ -14,6 +14,7 @@ var CommandList = []discord.ApplicationCommandCreate{
 	queueCommand,
 	disconnectCommand,
 	stopCommand,
+	pauseCommand,
 }
 
 func CommandHandlers(b *dbot.Bot) *handler.Mux {
@@ -38,6 +39,9 @@ func CommandHandlers(b *dbot.Bot) *handler.Mux {
 	})
 	h.Command("/stop", func(e *handler.CommandEvent) error {
 		return stopHandler(e, b)
+	})
+	h.Command("/pause", func(e *handler.CommandEvent) error {
+		return pauseHandler(e, b)
 	})
 
 	return h

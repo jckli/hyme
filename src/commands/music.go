@@ -203,7 +203,7 @@ func skipHandler(e *handler.CommandEvent, b *dbot.Bot) error {
 		return e.Respond(
 			discord.InteractionResponseTypeCreateMessage,
 			discord.NewMessageUpdateBuilder().
-				SetEmbeds(utils.ErrorEmbed("An error has occured.")).
+				SetEmbeds(utils.ErrorEmbed("An error has occurred.")).
 				Build(),
 		)
 	}
@@ -287,7 +287,7 @@ func queueHandler(e *handler.CommandEvent, b *dbot.Bot) error {
 		return e.Respond(
 			discord.InteractionResponseTypeCreateMessage,
 			discord.NewMessageUpdateBuilder().
-				SetEmbeds(utils.ErrorEmbed("An error has occured.")).
+				SetEmbeds(utils.ErrorEmbed("An error has occurred.")).
 				Build(),
 		)
 	}
@@ -316,7 +316,7 @@ func disconnectHandler(e *handler.CommandEvent, b *dbot.Bot) error {
 		return e.Respond(
 			discord.InteractionResponseTypeCreateMessage,
 			discord.NewMessageUpdateBuilder().
-				SetEmbeds(utils.ErrorEmbed("You are not in a voice channel. Please join one and try again.")).
+				SetEmbeds(utils.ErrorEmbed("You are not in the same voice channel as me.")).
 				Build(),
 		)
 	}
@@ -337,7 +337,7 @@ func disconnectHandler(e *handler.CommandEvent, b *dbot.Bot) error {
 		return e.Respond(
 			discord.InteractionResponseTypeCreateMessage,
 			discord.NewMessageUpdateBuilder().
-				SetEmbeds(utils.ErrorEmbed("An error has occured.")).
+				SetEmbeds(utils.ErrorEmbed("An error has occurred.")).
 				Build(),
 		)
 	}
@@ -369,6 +369,26 @@ func stopHandler(e *handler.CommandEvent, b *dbot.Bot) error {
 		)
 	}
 
+	voiceState, vsok := e.Client().
+		Caches().
+		VoiceState(*e.GuildID(), e.User().ID)
+	if !vsok {
+		return e.Respond(
+			discord.InteractionResponseTypeCreateMessage,
+			discord.NewMessageUpdateBuilder().
+				SetEmbeds(utils.ErrorEmbed("You are not in the same voice channel as me.")).
+				Build(),
+		)
+	}
+	if *voiceState.ChannelID != *player.ChannelID() {
+		return e.Respond(
+			discord.InteractionResponseTypeCreateMessage,
+			discord.NewMessageUpdateBuilder().
+				SetEmbeds(utils.ErrorEmbed("You are not in the same voice channel as me.")).
+				Build(),
+		)
+	}
+
 	var (
 		track lavalink.Track
 		ok    bool
@@ -382,7 +402,7 @@ func stopHandler(e *handler.CommandEvent, b *dbot.Bot) error {
 			return e.Respond(
 				discord.InteractionResponseTypeCreateMessage,
 				discord.NewMessageUpdateBuilder().
-					SetEmbeds(utils.ErrorEmbed("An error has occured.")).
+					SetEmbeds(utils.ErrorEmbed("An error has occurred.")).
 					Build(),
 			)
 		}
@@ -393,7 +413,7 @@ func stopHandler(e *handler.CommandEvent, b *dbot.Bot) error {
 			return e.Respond(
 				discord.InteractionResponseTypeCreateMessage,
 				discord.NewMessageUpdateBuilder().
-					SetEmbeds(utils.ErrorEmbed("An error has occured.")).
+					SetEmbeds(utils.ErrorEmbed("An error has occurred.")).
 					Build(),
 			)
 		}
@@ -403,7 +423,7 @@ func stopHandler(e *handler.CommandEvent, b *dbot.Bot) error {
 			return e.Respond(
 				discord.InteractionResponseTypeCreateMessage,
 				discord.NewMessageUpdateBuilder().
-					SetEmbeds(utils.ErrorEmbed("An error has occured.")).
+					SetEmbeds(utils.ErrorEmbed("An error has occurred.")).
 					Build(),
 			)
 		}
@@ -413,6 +433,61 @@ func stopHandler(e *handler.CommandEvent, b *dbot.Bot) error {
 		discord.InteractionResponseTypeCreateMessage,
 		discord.NewMessageUpdateBuilder().
 			SetEmbeds(utils.StopEmbedHandler(&track)).
+			Build(),
+	)
+}
+
+var pauseCommand = discord.SlashCommandCreate{
+	Name:        "pause",
+	Description: "Pauses the player",
+}
+
+func pauseHandler(e *handler.CommandEvent, b *dbot.Bot) error {
+	player := b.Music.Lavalink.Player(*e.GuildID())
+	if player == nil || player.Track() == nil {
+		return e.Respond(
+			discord.InteractionResponseTypeCreateMessage,
+			discord.NewMessageUpdateBuilder().
+				SetEmbeds(utils.ErrorEmbed("I am currently not playing anything.")).
+				Build(),
+		)
+	}
+
+	voiceState, vsok := e.Client().
+		Caches().
+		VoiceState(*e.GuildID(), e.User().ID)
+	if !vsok {
+		return e.Respond(
+			discord.InteractionResponseTypeCreateMessage,
+			discord.NewMessageUpdateBuilder().
+				SetEmbeds(utils.ErrorEmbed("You are not in the same voice channel as me.")).
+				Build(),
+		)
+	}
+	if *voiceState.ChannelID != *player.ChannelID() {
+		return e.Respond(
+			discord.InteractionResponseTypeCreateMessage,
+			discord.NewMessageUpdateBuilder().
+				SetEmbeds(utils.ErrorEmbed("You are not in the same voice channel as me.")).
+				Build(),
+		)
+	}
+
+	err := player.Update(context.Background(), lavalink.WithPaused(true))
+	if err != nil {
+		b.Music.MusicLogger.Error(err)
+		return e.Respond(
+			discord.InteractionResponseTypeCreateMessage,
+			discord.NewMessageUpdateBuilder().
+				SetEmbeds(utils.ErrorEmbed("An error has occurred.")).
+				Build(),
+		)
+	}
+
+	return e.Respond(
+		discord.InteractionResponseTypeCreateMessage,
+		discord.NewMessageUpdateBuilder().
+			SetEmbeds(utils.SuccessEmbed("Successfully paused the player.")).
 			Build(),
 	)
 }
