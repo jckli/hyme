@@ -61,12 +61,14 @@ func TrackHandler(
 			return err
 		}
 		description = "Playing track: [`" + track.Info.Title + "`](" + *track.Info.URI + ")"
-	}
-	if len(tracks) > 0 || len(queue.Tracks) > 0 {
-		queue.Add(tracks...)
-		description += "Added `" + strconv.Itoa(
-			len(queue.Tracks),
-		) + "` tracks to the queue."
+	} else {
+		if len(tracks) > 0 {
+			queue.Add(tracks...)
+			description += "Added `" + strconv.Itoa(len(tracks)) + "` tracks to the queue."
+		} else {
+			queue.Add(tracks...)
+			description += "Added [`" + tracks[0].Info.Title + "`](" + *tracks[0].Info.URI + ")" + "` to the queue."
+		}
 	}
 
 	e.Client().

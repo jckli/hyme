@@ -3,6 +3,7 @@ package commands
 import (
 	"context"
 	"regexp"
+	"strconv"
 	"time"
 
 	"github.com/disgoorg/disgo/discord"
@@ -152,4 +153,66 @@ func playHandler(e *handler.CommandEvent, b *dbot.Bot) error {
 	}()
 
 	return nil
+}
+
+var skipCommand = discord.SlashCommandCreate{
+	Name:        "skip",
+	Description: "Skips the current song",
+	Options: []discord.ApplicationCommandOption{
+		discord.ApplicationCommandOptionInt{
+			Name:        "amount",
+			Description: "The amount of songs to skip",
+			Required:    false,
+		},
+	},
+}
+
+func skipHandler(e *handler.CommandEvent, b *dbot.Bot) error {
+	player := b.Music.Lavalink.Player(*e.GuildID())
+	queue := b.Music.Players.Get(*e.GuildID())
+	if player == nil || player.Track() == nil {
+		return e.Respond(
+			discord.InteractionResponseTypeUpdateMessage,
+			discord.NewMessageUpdateBuilder().
+				SetEmbeds(utils.ErrorEmbed("I am currently not playing anything.")).
+				Build(),
+		)
+	}
+
+	amount := 1
+	if data, ok := e.SlashCommandInteractionData().OptInt("amount"); ok {
+		amount = data
+	}
+
+	if amount > len(queue.Tracks) {
+		amount = len(queue.Tracks)
+	}
+
+	track, ok := queue.Skip(amount)
+	if !ok {
+		return e.Respond(
+			discord.InteractionResponseTypeUpdateMessage,
+			discord.NewMessageUpdateBuilder().
+				SetEmbeds(utils.ErrorEmbed("There are no more songs to skip.")).
+				Build(),
+		)
+	}
+
+	err := player.Update(context.Background(), lavalink.WithTrack(track))
+	if err != nil {
+		b.Music.MusicLogger.Error(err)
+		return e.Respond(
+			discord.InteractionResponseTypeUpdateMessage,
+			discord.NewMessageUpdateBuilder().
+				SetEmbeds(utils.ErrorEmbed("An error has occured.")).
+				Build(),
+		)
+	}
+
+	return e.Respond(
+		discord.InteractionResponseTypeUpdateMessage,
+		discord.NewMessageUpdateBuilder().
+			SetEmbeds(utils.SuccessEmbed("Skipped "+strconv.Itoa(amount)+" songs.")).
+			Build(),
+	)
 }
