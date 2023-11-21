@@ -54,7 +54,7 @@ func New(version string) *Bot {
 					Last:  paginator.DefaultConfig().ButtonsConfig.Last,
 				},
 			),
-			paginator.WithTimeout(5*time.Minute),
+			paginator.WithCleanupInterval(5*time.Minute),
 		),
 		Config: Config{
 			Token:       os.Getenv("TOKEN"),

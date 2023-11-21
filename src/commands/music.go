@@ -518,3 +518,51 @@ func resumeHandler(e *handler.CommandEvent, b *dbot.Bot) error {
 			Build(),
 	)
 }
+
+var shuffleCommand = discord.SlashCommandCreate{
+	Name:        "shuffle",
+	Description: "Shuffles the queue",
+}
+
+func shuffleHandler(e *handler.CommandEvent, b *dbot.Bot) error {
+	player := b.Music.Lavalink.Player(*e.GuildID())
+	if player == nil || player.Track() == nil {
+		return e.Respond(
+			discord.InteractionResponseTypeCreateMessage,
+			discord.NewMessageUpdateBuilder().
+				SetEmbeds(utils.ErrorEmbed("I am currently not playing anything.")).
+				Build(),
+		)
+	}
+
+	voiceState, vsok := e.Client().
+		Caches().
+		VoiceState(*e.GuildID(), e.User().ID)
+	if !vsok || *voiceState.ChannelID != *player.ChannelID() {
+		return e.Respond(
+			discord.InteractionResponseTypeCreateMessage,
+			discord.NewMessageUpdateBuilder().
+				SetEmbeds(utils.ErrorEmbed("You are not in the same voice channel as me.")).
+				Build(),
+		)
+	}
+
+	queue := b.Music.Players.Get(*e.GuildID())
+	if len(queue.Tracks) == 0 {
+		return e.Respond(
+			discord.InteractionResponseTypeCreateMessage,
+			discord.NewMessageUpdateBuilder().
+				SetEmbeds(utils.ErrorEmbed("There is no queue.")).
+				Build(),
+		)
+	}
+
+	queue.Shuffle()
+
+	return e.Respond(
+		discord.InteractionResponseTypeCreateMessage,
+		discord.NewMessageUpdateBuilder().
+			SetEmbeds(utils.SuccessEmbed("Successfully shuffled the queue.")).
+			Build(),
+	)
+}
