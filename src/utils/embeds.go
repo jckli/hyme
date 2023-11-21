@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"strconv"
+
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgolink/v3/lavalink"
 )
@@ -33,6 +35,28 @@ func PlayEmbedHandler(track *lavalink.Track) discord.Embed {
 		) + "]"
 	} else {
 		description = "[`" + track.Info.Title + "`](" + *track.Info.URI + ")\n[" + FormatDuration(track.Info.Length) + "]"
+	}
+	embed.SetDescription(description)
+
+	if track.Info.ArtworkURL != nil {
+		embed.SetThumbnail(*track.Info.ArtworkURL)
+	}
+
+	return embed.Build()
+}
+
+func SkipEmbedHandler(track *lavalink.Track, amount int) discord.Embed {
+	embed := discord.NewEmbedBuilder().
+		SetColor(0xa4849a).
+		SetTitle("Skipped " + strconv.Itoa(amount) + " Track(s)")
+
+	description := "Now Playing:\n"
+	if track.Info.Author != "" {
+		description += "[`" + track.Info.Title + "`](" + *track.Info.URI + ") by `" + track.Info.Author + "`\n[" + FormatDuration(
+			track.Info.Length,
+		) + "]"
+	} else {
+		description += "[`" + track.Info.Title + "`](" + *track.Info.URI + ")\n[" + FormatDuration(track.Info.Length) + "]"
 	}
 	embed.SetDescription(description)
 

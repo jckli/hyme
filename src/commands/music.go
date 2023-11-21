@@ -3,7 +3,6 @@ package commands
 import (
 	"context"
 	"regexp"
-	"strconv"
 	"time"
 
 	"github.com/disgoorg/disgo/discord"
@@ -210,7 +209,31 @@ func skipHandler(e *handler.CommandEvent, b *dbot.Bot) error {
 	return e.Respond(
 		discord.InteractionResponseTypeCreateMessage,
 		discord.NewMessageUpdateBuilder().
-			SetEmbeds(utils.SuccessEmbed("Skipped "+strconv.Itoa(amount)+" songs.")).
+			SetEmbeds(utils.SkipEmbedHandler(&track, amount)).
+			Build(),
+	)
+}
+
+var queueCommand = discord.SlashCommandCreate{
+	Name:        "queue",
+	Description: "Shows the current queue",
+}
+
+func queueHandler(e *handler.CommandEvent, b *dbot.Bot) error {
+	queue := b.Music.Players.Get(*e.GuildID())
+	if queue == nil {
+		return e.Respond(
+			discord.InteractionResponseTypeCreateMessage,
+			discord.NewMessageUpdateBuilder().
+				SetEmbeds(utils.ErrorEmbed("There is no queue.")).
+				Build(),
+		)
+	}
+
+	return e.Respond(
+		discord.InteractionResponseTypeCreateMessage,
+		discord.NewMessageUpdateBuilder().
+			SetEmbeds().
 			Build(),
 	)
 }

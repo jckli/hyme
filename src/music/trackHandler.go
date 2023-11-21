@@ -67,13 +67,13 @@ func TrackHandler(
 	} else {
 		b.MusicLogger.Infof("Queue: %s", queue)
 		b.MusicLogger.Infof("Queue length: %d", len(queue.Tracks))
-		if len(tracks) > 0 {
+		if len(tracks) > 1 {
 			queue.Add(tracks...)
-			description = "Added `" + strconv.Itoa(len(tracks)) + "` tracks to the queue."
+			description = "Added `" + strconv.Itoa(len(tracks)) + "` track(s) to the queue."
 			b.MusicLogger.Infof("Queue length New: %d", len(queue.Tracks))
 		} else {
 			queue.Add(tracks...)
-			description = "Added [`" + tracks[0].Info.Title + "`](" + *tracks[0].Info.URI + ")" + "` to the queue."
+			description = "Added [`" + tracks[0].Info.Title + "`](" + *tracks[0].Info.URI + ")" + " to the queue."
 			b.MusicLogger.Infof("Queue length New: %d", len(queue.Tracks))
 		}
 		b.MusicLogger.Infof("Queue New: %s", queue)
