@@ -41,6 +41,10 @@ var playCommand = discord.SlashCommandCreate{
 					Value: string(lavalink.SearchTypeYouTube),
 				},
 				{
+					Name:  "YouTube Music",
+					Value: string(lavalink.SearchTypeYouTubeMusic),
+				},
+				{
 					Name:  "Spotify",
 					Value: "spsearch",
 				},
