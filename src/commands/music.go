@@ -576,13 +576,13 @@ var moveCommand = discord.SlashCommandCreate{
 	Description: "Moves a song to a specified position in the queue",
 	Options: []discord.ApplicationCommandOption{
 		discord.ApplicationCommandOptionInt{
-			Name:        "track",
-			Description: "The track to move",
+			Name:        "song",
+			Description: "The song to move",
 			Required:    true,
 		},
 		discord.ApplicationCommandOptionInt{
 			Name:        "position",
-			Description: "The position to move the track to",
+			Description: "The position to move the song to",
 			Required:    true,
 		},
 	},
@@ -621,14 +621,14 @@ func moveHandler(e *handler.CommandEvent, b *dbot.Bot) error {
 		)
 	}
 
-	from := e.SlashCommandInteractionData().Int("track")
+	from := e.SlashCommandInteractionData().Int("song")
 	to := e.SlashCommandInteractionData().Int("position")
 
 	if from < 1 || from > len(queue.Tracks) {
 		return e.Respond(
 			discord.InteractionResponseTypeCreateMessage,
 			discord.NewMessageUpdateBuilder().
-				SetEmbeds(utils.ErrorEmbed(fmt.Sprintf("Invalid track number. Please enter a number between 1 and %d.", len(queue.Tracks)))).
+				SetEmbeds(utils.ErrorEmbed(fmt.Sprintf("Invalid song number. Please enter a number between 1 and %d.", len(queue.Tracks)))).
 				Build(),
 		)
 	}
@@ -649,6 +649,74 @@ func moveHandler(e *handler.CommandEvent, b *dbot.Bot) error {
 		discord.InteractionResponseTypeCreateMessage,
 		discord.NewMessageUpdateBuilder().
 			SetEmbeds(utils.MoveEmbedHandler(&track, from, to)).
+			Build(),
+	)
+}
+
+var removeCommand = discord.SlashCommandCreate{
+	Name:        "remove",
+	Description: "Removes a song from the queue",
+	Options: []discord.ApplicationCommandOption{
+		discord.ApplicationCommandOptionInt{
+			Name:        "song",
+			Description: "The song to remove",
+			Required:    true,
+		},
+	},
+}
+
+func removeHandler(e *handler.CommandEvent, b *dbot.Bot) error {
+	player := b.Music.Lavalink.Player(*e.GuildID())
+	if player == nil || player.Track() == nil {
+		return e.Respond(
+			discord.InteractionResponseTypeCreateMessage,
+			discord.NewMessageUpdateBuilder().
+				SetEmbeds(utils.ErrorEmbed("I am currently not playing anything.")).
+				Build(),
+		)
+	}
+
+	voiceState, vsok := e.Client().
+		Caches().
+		VoiceState(*e.GuildID(), e.User().ID)
+	if !vsok || *voiceState.ChannelID != *player.ChannelID() {
+		return e.Respond(
+			discord.InteractionResponseTypeCreateMessage,
+			discord.NewMessageUpdateBuilder().
+				SetEmbeds(utils.ErrorEmbed("You are not in the same voice channel as me.")).
+				Build(),
+		)
+	}
+
+	queue := b.Music.Players.Get(*e.GuildID())
+	if len(queue.Tracks) == 0 {
+		return e.Respond(
+			discord.InteractionResponseTypeCreateMessage,
+			discord.NewMessageUpdateBuilder().
+				SetEmbeds(utils.ErrorEmbed("There is no queue.")).
+				Build(),
+		)
+	}
+
+	pos := e.SlashCommandInteractionData().Int("song")
+
+	if pos < 1 || pos > len(queue.Tracks) {
+		return e.Respond(
+			discord.InteractionResponseTypeCreateMessage,
+			discord.NewMessageUpdateBuilder().
+				SetEmbeds(utils.ErrorEmbed(fmt.Sprintf("Invalid song number. Please enter a number between 1 and %d.", len(queue.Tracks)))).
+				Build(),
+		)
+	}
+
+	track := queue.Tracks[pos-1]
+
+	queue.Remove(pos - 1)
+
+	return e.Respond(
+		discord.InteractionResponseTypeCreateMessage,
+		discord.NewMessageUpdateBuilder().
+			SetEmbeds(utils.RemoveEmbedHandler(&track, pos)).
 			Build(),
 	)
 }

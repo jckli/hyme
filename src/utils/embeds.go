@@ -165,3 +165,26 @@ func MoveEmbedHandler(
 
 	return embed.Build()
 }
+
+func RemoveEmbedHandler(
+	track *lavalink.Track,
+	position int,
+) discord.Embed {
+	embed := discord.NewEmbedBuilder().
+		SetColor(0xa4849a)
+
+	if track.Info.Author != "" {
+		embed.
+			SetTitle("Removed Track").
+			SetDescription("Successfully removed [`" + track.Info.Title + "`](" + *track.Info.URI + ") by `" + track.Info.Author + "` [" + FormatDuration(track.Info.Length) + "] from position `" + strconv.Itoa(position) + "` in the queue")
+	} else {
+		embed.
+			SetTitle("Removed Track").
+			SetDescription("Successfully removed [`" + track.Info.Title + "`](" + *track.Info.URI + ") [" + FormatDuration(track.Info.Length) + "] from position `" + strconv.Itoa(position) + "` in the queue")
+	}
+	if track.Info.ArtworkURL != nil {
+		embed.SetThumbnail(*track.Info.ArtworkURL)
+	}
+
+	return embed.Build()
+}

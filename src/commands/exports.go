@@ -18,6 +18,7 @@ var CommandList = []discord.ApplicationCommandCreate{
 	resumeCommand,
 	shuffleCommand,
 	moveCommand,
+	removeCommand,
 }
 
 func CommandHandlers(b *dbot.Bot) *handler.Mux {
@@ -54,6 +55,9 @@ func CommandHandlers(b *dbot.Bot) *handler.Mux {
 	})
 	h.Command("/move", func(e *handler.CommandEvent) error {
 		return moveHandler(e, b)
+	})
+	h.Command("/remove", func(e *handler.CommandEvent) error {
+		return removeHandler(e, b)
 	})
 
 	return h

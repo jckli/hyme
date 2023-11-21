@@ -65,3 +65,7 @@ func (q *Queue) Move(from, to int) {
 		q.Tracks[:to],
 		append([]lavalink.Track{track}, q.Tracks[to:]...)...)
 }
+
+func (q *Queue) Remove(index int) {
+	q.Tracks = append(q.Tracks[:index], q.Tracks[index+1:]...)
+}
