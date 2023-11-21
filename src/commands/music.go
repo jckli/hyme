@@ -253,7 +253,7 @@ func queueHandler(e *handler.CommandEvent, b *dbot.Bot) error {
 		pageText = "No songs in queue."
 		queuePages = append(queuePages, pageText)
 	} else {
-		split := utils.Chunks(queue.Tracks, 10)
+		split := utils.Chunks(queue.Tracks, 8)
 		i := 1
 		for _, chunk := range split {
 			for _, track := range chunk {
