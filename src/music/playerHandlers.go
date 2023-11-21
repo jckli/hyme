@@ -14,7 +14,7 @@ func autoLeaveTimeout(
 	b *Music,
 	guildId *snowflake.ID,
 ) {
-	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Minute)
 	b.MusicLogger.Infof("Starting auto leave timer for guild: %s", guildId)
 	queue.Cancel = cancel
 	<-ctx.Done()
@@ -32,6 +32,13 @@ func onPlayerPause(
 	b *Music,
 ) {
 	b.MusicLogger.Infof("onPlayerPause: %s", event)
+	guildId := event.GuildID()
+	go autoLeaveTimeout(
+		b.Players.Get(event.GuildID()),
+		player,
+		b,
+		&guildId,
+	)
 }
 
 func onPlayerResume(
@@ -40,6 +47,11 @@ func onPlayerResume(
 	b *Music,
 ) {
 	b.MusicLogger.Infof("onPlayerResume: %s", event)
+	queue := b.Players.Get(event.GuildID())
+	if queue.Cancel != nil {
+		queue.Cancel()
+		queue.Cancel = nil
+	}
 }
 
 func onTrackStart(
