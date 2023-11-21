@@ -49,8 +49,9 @@ func (q *Queue) Skip(amount int) (lavalink.Track, bool) {
 	if amount > len(q.Tracks) {
 		amount = len(q.Tracks)
 	}
+	track := q.Tracks[amount-1]
 	q.Tracks = q.Tracks[amount:]
-	return q.Tracks[0], true
+	return track, true
 }
 
 func (q *Queue) Clear() {

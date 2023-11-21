@@ -172,7 +172,7 @@ func skipHandler(e *handler.CommandEvent, b *dbot.Bot) error {
 	queue := b.Music.Players.Get(*e.GuildID())
 	if player == nil || player.Track() == nil {
 		return e.Respond(
-			discord.InteractionResponseTypeUpdateMessage,
+			discord.InteractionResponseTypeCreateMessage,
 			discord.NewMessageUpdateBuilder().
 				SetEmbeds(utils.ErrorEmbed("I am currently not playing anything.")).
 				Build(),
@@ -184,14 +184,12 @@ func skipHandler(e *handler.CommandEvent, b *dbot.Bot) error {
 		amount = data
 	}
 
-	if amount > len(queue.Tracks) {
-		amount = len(queue.Tracks)
-	}
+	b.Music.MusicLogger.Infof("Skipping %d songs", amount)
 
 	track, ok := queue.Skip(amount)
 	if !ok {
 		return e.Respond(
-			discord.InteractionResponseTypeUpdateMessage,
+			discord.InteractionResponseTypeCreateMessage,
 			discord.NewMessageUpdateBuilder().
 				SetEmbeds(utils.ErrorEmbed("There are no more songs to skip.")).
 				Build(),
@@ -202,7 +200,7 @@ func skipHandler(e *handler.CommandEvent, b *dbot.Bot) error {
 	if err != nil {
 		b.Music.MusicLogger.Error(err)
 		return e.Respond(
-			discord.InteractionResponseTypeUpdateMessage,
+			discord.InteractionResponseTypeCreateMessage,
 			discord.NewMessageUpdateBuilder().
 				SetEmbeds(utils.ErrorEmbed("An error has occured.")).
 				Build(),
@@ -210,7 +208,7 @@ func skipHandler(e *handler.CommandEvent, b *dbot.Bot) error {
 	}
 
 	return e.Respond(
-		discord.InteractionResponseTypeUpdateMessage,
+		discord.InteractionResponseTypeCreateMessage,
 		discord.NewMessageUpdateBuilder().
 			SetEmbeds(utils.SuccessEmbed("Skipped "+strconv.Itoa(amount)+" songs.")).
 			Build(),
