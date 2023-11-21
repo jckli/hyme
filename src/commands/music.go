@@ -294,3 +294,61 @@ func queueHandler(e *handler.CommandEvent, b *dbot.Bot) error {
 
 	return nil
 }
+
+var disconnectCommand = discord.SlashCommandCreate{
+	Name:        "disconnect",
+	Description: "Disconnects the bot from the voice channel",
+}
+
+func disconnectHandler(e *handler.CommandEvent, b *dbot.Bot) error {
+	player := b.Music.Lavalink.Player(*e.GuildID())
+	if player == nil {
+		return e.Respond(
+			discord.InteractionResponseTypeCreateMessage,
+			discord.NewMessageUpdateBuilder().
+				SetEmbeds(utils.ErrorEmbed("I am currently not in a voice channel.")).
+				Build(),
+		)
+	}
+
+	voiceState, ok := e.Client().Caches().VoiceState(*e.GuildID(), e.User().ID)
+	if !ok {
+		return e.Respond(
+			discord.InteractionResponseTypeCreateMessage,
+			discord.NewMessageUpdateBuilder().
+				SetEmbeds(utils.ErrorEmbed("You are not in a voice channel. Please join one and try again.")).
+				Build(),
+		)
+	}
+	if *voiceState.ChannelID != *player.ChannelID() {
+		return e.Respond(
+			discord.InteractionResponseTypeCreateMessage,
+			discord.NewMessageUpdateBuilder().
+				SetEmbeds(utils.ErrorEmbed("You are not in the same voice channel as me.")).
+				Build(),
+		)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	err := e.Client().UpdateVoiceState(ctx, *e.GuildID(), nil, false, false)
+	if err != nil {
+		b.Music.MusicLogger.Error(err)
+		return e.Respond(
+			discord.InteractionResponseTypeCreateMessage,
+			discord.NewMessageUpdateBuilder().
+				SetEmbeds(utils.ErrorEmbed("An error has occured.")).
+				Build(),
+		)
+	}
+
+	player.Update(ctx, lavalink.WithNullTrack())
+	b.Music.Players.Delete(*e.GuildID())
+
+	return e.Respond(
+		discord.InteractionResponseTypeCreateMessage,
+		discord.NewMessageUpdateBuilder().
+			SetEmbeds(utils.ErrorEmbed("Disconnected from the voice channel.")).
+			Build(),
+	)
+}
