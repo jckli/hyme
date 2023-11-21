@@ -14,14 +14,16 @@ func autoLeaveTimeout(
 	b *Music,
 	guildId *snowflake.ID,
 ) {
-	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	b.MusicLogger.Infof("Starting auto leave timer for guild: %s", guildId)
 	queue.Cancel = cancel
 	<-ctx.Done()
-	b.MusicLogger.Infof("Auto leave timer finished for guild: %s", guildId)
-	player.Update(context.TODO(), lavalink.WithNullTrack())
-	b.Client.UpdateVoiceState(context.TODO(), *guildId, nil, false, false)
-	queue.Clear()
+	b.MusicLogger.Infof("Auto leave timer stopped for guild: %s", guildId)
+	if ctx.Err() == context.DeadlineExceeded {
+		player.Update(context.TODO(), lavalink.WithNullTrack())
+		b.Client.UpdateVoiceState(context.TODO(), *guildId, nil, false, false)
+		queue.Clear()
+	}
 }
 
 func onPlayerPause(
