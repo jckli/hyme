@@ -119,3 +119,25 @@ func StopEmbedHandler(
 
 	return embed.Build()
 }
+
+func ResumeEmbedHandler(
+	track *lavalink.Track,
+) discord.Embed {
+	embed := discord.NewEmbedBuilder().
+		SetColor(0xa4849a)
+
+	if track.Info.Author != "" {
+		embed.
+			SetTitle("Resumed Playing").
+			SetDescription("[`" + track.Info.Title + "`](" + *track.Info.URI + ") by `" + track.Info.Author + "`\n[" + FormatDuration(track.Info.Position) + "/" + FormatDuration(track.Info.Length) + "]")
+	} else {
+		embed.
+			SetTitle("Resumed Playing").
+			SetDescription("[`" + track.Info.Title + "`](" + *track.Info.URI + ")\n[" + FormatDuration(track.Info.Position) + "/" + FormatDuration(track.Info.Length) + "]")
+	}
+	if track.Info.ArtworkURL != nil {
+		embed.SetThumbnail(*track.Info.ArtworkURL)
+	}
+
+	return embed.Build()
+}
