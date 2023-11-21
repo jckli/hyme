@@ -352,3 +352,67 @@ func disconnectHandler(e *handler.CommandEvent, b *dbot.Bot) error {
 			Build(),
 	)
 }
+
+var stopCommand = discord.SlashCommandCreate{
+	Name:        "stop",
+	Description: "Skips to the next song and pauses the player",
+}
+
+func stopHandler(e *handler.CommandEvent, b *dbot.Bot) error {
+	player := b.Music.Lavalink.Player(*e.GuildID())
+	if player == nil || player.Track() == nil {
+		return e.Respond(
+			discord.InteractionResponseTypeCreateMessage,
+			discord.NewMessageUpdateBuilder().
+				SetEmbeds(utils.ErrorEmbed("I am currently not playing anything.")).
+				Build(),
+		)
+	}
+
+	var (
+		track lavalink.Track
+		ok    bool
+	)
+	queue := b.Music.Players.Get(*e.GuildID())
+	if len(queue.Tracks) == 0 {
+		player.Update(context.Background(), lavalink.WithNullTrack())
+	} else {
+		track, ok = queue.Skip(1)
+		if !ok {
+			return e.Respond(
+				discord.InteractionResponseTypeCreateMessage,
+				discord.NewMessageUpdateBuilder().
+					SetEmbeds(utils.ErrorEmbed("An error has occured.")).
+					Build(),
+			)
+		}
+
+		err := player.Update(context.Background(), lavalink.WithTrack(track))
+		if err != nil {
+			b.Music.MusicLogger.Error(err)
+			return e.Respond(
+				discord.InteractionResponseTypeCreateMessage,
+				discord.NewMessageUpdateBuilder().
+					SetEmbeds(utils.ErrorEmbed("An error has occured.")).
+					Build(),
+			)
+		}
+		err = player.Update(context.Background(), lavalink.WithPaused(true))
+		if err != nil {
+			b.Music.MusicLogger.Error(err)
+			return e.Respond(
+				discord.InteractionResponseTypeCreateMessage,
+				discord.NewMessageUpdateBuilder().
+					SetEmbeds(utils.ErrorEmbed("An error has occured.")).
+					Build(),
+			)
+		}
+	}
+
+	return e.Respond(
+		discord.InteractionResponseTypeCreateMessage,
+		discord.NewMessageUpdateBuilder().
+			SetEmbeds(utils.StopEmbedHandler(&track)).
+			Build(),
+	)
+}

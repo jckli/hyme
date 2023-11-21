@@ -91,3 +91,31 @@ func QueueEmbedHandler(
 
 	embed.AddField("Up Next", queue, false)
 }
+
+func StopEmbedHandler(
+	track *lavalink.Track,
+) discord.Embed {
+	embed := discord.NewEmbedBuilder().
+		SetColor(0xa4849a)
+
+	if track != nil && track.Info.Title != "" {
+		if track.Info.Author != "" {
+			embed.
+				SetTitle("Stopped Playing and Paused Player").
+				SetDescription("Skipped to: [`" + track.Info.Title + "`](" + *track.Info.URI + ") by `" + track.Info.Author + "`\n[" + FormatDuration(track.Info.Length) + "]")
+		} else {
+			embed.
+				SetTitle("Stopped Playing and Paused Player").
+				SetDescription("Skipped to: [`" + track.Info.Title + "`](" + *track.Info.URI + ")\n[" + FormatDuration(track.Info.Length) + "]")
+		}
+		if track.Info.ArtworkURL != nil {
+			embed.SetThumbnail(*track.Info.ArtworkURL)
+		}
+	} else {
+		embed.
+			SetTitle("Stopped Playing").
+			SetDescription("Skipped current song.")
+	}
+
+	return embed.Build()
+}
