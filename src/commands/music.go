@@ -254,10 +254,11 @@ func queueHandler(e *handler.CommandEvent, b *dbot.Bot) error {
 		for _, chunk := range split {
 			for _, track := range chunk {
 				track := fmt.Sprintf(
-					"%d. [`%s`](%s) [%s]\n",
+					"%d. [`%s`](%s) by `%s` [%s]\n",
 					i,
 					track.Info.Title,
 					*track.Info.URI,
+					track.Info.Author,
 					utils.FormatDuration(track.Info.Length),
 				)
 				pageText += track
@@ -277,8 +278,9 @@ func queueHandler(e *handler.CommandEvent, b *dbot.Bot) error {
 				fmt.Sprintf("Page %d/%d", page+1, len(queuePages)),
 			)
 		},
-		Pages:   len(queuePages),
-		Creator: e.User().ID,
+		Pages:      len(queuePages),
+		Creator:    e.User().ID,
+		ExpireMode: paginator.ExpireModeAfterLastUsage,
 	}, false)
 	if err != nil {
 		b.Music.MusicLogger.Error(err)

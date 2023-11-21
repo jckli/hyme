@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/jckli/hyme/src/music"
 
@@ -53,6 +54,7 @@ func New(version string) *Bot {
 					Last:  paginator.DefaultConfig().ButtonsConfig.Last,
 				},
 			),
+			paginator.WithTimeout(5*time.Minute),
 		),
 		Config: Config{
 			Token:       os.Getenv("TOKEN"),
