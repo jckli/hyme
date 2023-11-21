@@ -16,7 +16,7 @@ import (
 )
 
 func main() {
-	hyme := dbot.New("v0.0.1")
+	hyme := dbot.New(os.Getenv("VERSION"))
 
 	h := commands.CommandHandlers(hyme)
 
