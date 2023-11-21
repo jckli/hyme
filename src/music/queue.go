@@ -57,3 +57,11 @@ func (q *Queue) Skip(amount int) (lavalink.Track, bool) {
 func (q *Queue) Clear() {
 	q.Tracks = make([]lavalink.Track, 0)
 }
+
+func (q *Queue) Move(from, to int) {
+	track := q.Tracks[from]
+	q.Tracks = append(q.Tracks[:from], q.Tracks[from+1:]...)
+	q.Tracks = append(
+		q.Tracks[:to],
+		append([]lavalink.Track{track}, q.Tracks[to:]...)...)
+}

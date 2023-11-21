@@ -570,3 +570,85 @@ func shuffleHandler(e *handler.CommandEvent, b *dbot.Bot) error {
 			Build(),
 	)
 }
+
+var moveCommand = discord.SlashCommandCreate{
+	Name:        "move",
+	Description: "Moves a song to a specified position in the queue",
+	Options: []discord.ApplicationCommandOption{
+		discord.ApplicationCommandOptionInt{
+			Name:        "track",
+			Description: "The track to move",
+			Required:    true,
+		},
+		discord.ApplicationCommandOptionInt{
+			Name:        "position",
+			Description: "The position to move the track to",
+			Required:    true,
+		},
+	},
+}
+
+func moveHandler(e *handler.CommandEvent, b *dbot.Bot) error {
+	player := b.Music.Lavalink.Player(*e.GuildID())
+	if player == nil || player.Track() == nil {
+		return e.Respond(
+			discord.InteractionResponseTypeCreateMessage,
+			discord.NewMessageUpdateBuilder().
+				SetEmbeds(utils.ErrorEmbed("I am currently not playing anything.")).
+				Build(),
+		)
+	}
+
+	voiceState, vsok := e.Client().
+		Caches().
+		VoiceState(*e.GuildID(), e.User().ID)
+	if !vsok || *voiceState.ChannelID != *player.ChannelID() {
+		return e.Respond(
+			discord.InteractionResponseTypeCreateMessage,
+			discord.NewMessageUpdateBuilder().
+				SetEmbeds(utils.ErrorEmbed("You are not in the same voice channel as me.")).
+				Build(),
+		)
+	}
+
+	queue := b.Music.Players.Get(*e.GuildID())
+	if len(queue.Tracks) == 0 {
+		return e.Respond(
+			discord.InteractionResponseTypeCreateMessage,
+			discord.NewMessageUpdateBuilder().
+				SetEmbeds(utils.ErrorEmbed("There is no queue.")).
+				Build(),
+		)
+	}
+
+	from := e.SlashCommandInteractionData().Int("track")
+	to := e.SlashCommandInteractionData().Int("position")
+
+	if from < 1 || from > len(queue.Tracks) {
+		return e.Respond(
+			discord.InteractionResponseTypeCreateMessage,
+			discord.NewMessageUpdateBuilder().
+				SetEmbeds(utils.ErrorEmbed(fmt.Sprintf("Invalid track number. Please enter a number between 1 and %d.", len(queue.Tracks)))).
+				Build(),
+		)
+	}
+	if to < 1 || to > len(queue.Tracks) {
+		return e.Respond(
+			discord.InteractionResponseTypeCreateMessage,
+			discord.NewMessageUpdateBuilder().
+				SetEmbeds(utils.ErrorEmbed(fmt.Sprintf("Invalid position to move to. Please enter a number between 1 and %d.", len(queue.Tracks)))).
+				Build(),
+		)
+	}
+
+	queue.Move(from-1, to-1)
+
+	track := queue.Tracks[to-1]
+
+	return e.Respond(
+		discord.InteractionResponseTypeCreateMessage,
+		discord.NewMessageUpdateBuilder().
+			SetEmbeds(utils.MoveEmbedHandler(&track, from, to)).
+			Build(),
+	)
+}

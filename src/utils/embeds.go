@@ -141,3 +141,27 @@ func ResumeEmbedHandler(
 
 	return embed.Build()
 }
+
+func MoveEmbedHandler(
+	track *lavalink.Track,
+	from int,
+	to int,
+) discord.Embed {
+	embed := discord.NewEmbedBuilder().
+		SetColor(0xa4849a)
+
+	if track.Info.Author != "" {
+		embed.
+			SetTitle("Moved Track").
+			SetDescription("Successfully moved [`" + track.Info.Title + "`](" + *track.Info.URI + ") by `" + track.Info.Author + "` [" + FormatDuration(track.Info.Length) + "] from position `" + strconv.Itoa(from) + "` to position `" + strconv.Itoa(to) + "` in the queue")
+	} else {
+		embed.
+			SetTitle("Moved Track").
+			SetDescription("Successfully moved [`" + track.Info.Title + "`](" + *track.Info.URI + ") [" + FormatDuration(track.Info.Length) + "] from position `" + strconv.Itoa(from) + "` to position `" + strconv.Itoa(to) + "` in the queue")
+	}
+	if track.Info.ArtworkURL != nil {
+		embed.SetThumbnail(*track.Info.ArtworkURL)
+	}
+
+	return embed.Build()
+}
