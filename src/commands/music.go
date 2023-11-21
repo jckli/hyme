@@ -2,6 +2,7 @@ package commands
 
 import (
 	"context"
+	"fmt"
 	"regexp"
 	"time"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/disgoorg/disgo/handler"
 	"github.com/disgoorg/disgolink/v3/disgolink"
 	"github.com/disgoorg/disgolink/v3/lavalink"
+	"github.com/disgoorg/paginator"
 	"github.com/jckli/hyme/src/dbot"
 	"github.com/jckli/hyme/src/music"
 	"github.com/jckli/hyme/src/utils"
@@ -220,6 +222,15 @@ var queueCommand = discord.SlashCommandCreate{
 }
 
 func queueHandler(e *handler.CommandEvent, b *dbot.Bot) error {
+	player := b.Music.Lavalink.Player(*e.GuildID())
+	if player == nil || player.Track() == nil {
+		return e.Respond(
+			discord.InteractionResponseTypeCreateMessage,
+			discord.NewMessageUpdateBuilder().
+				SetEmbeds(utils.ErrorEmbed("I am currently not playing anything.")).
+				Build(),
+		)
+	}
 	queue := b.Music.Players.Get(*e.GuildID())
 	if queue == nil {
 		return e.Respond(
@@ -230,10 +241,54 @@ func queueHandler(e *handler.CommandEvent, b *dbot.Bot) error {
 		)
 	}
 
-	return e.Respond(
-		discord.InteractionResponseTypeCreateMessage,
-		discord.NewMessageUpdateBuilder().
-			SetEmbeds().
-			Build(),
-	)
+	track := player.Track()
+
+	queuePages := []string{}
+	var pageText string
+	if len(queue.Tracks) == 0 {
+		pageText = "No songs in queue."
+		queuePages = append(queuePages, pageText)
+	} else {
+		for i, track := range queue.Tracks {
+			// every 15 tracks, create a new page
+			if i%15 == 0 && i != 0 {
+				pageText = ""
+			} else {
+				track := fmt.Sprintf(
+					"%d. [`%s`](%s) [%s]\n",
+					i+1,
+					track.Info.Title,
+					*track.Info.URI,
+					utils.FormatDuration(track.Info.Length),
+				)
+				pageText += track
+			}
+			queuePages = append(queuePages, pageText)
+		}
+	}
+
+	err := b.Paginator.Create(e.Respond, paginator.Pages{
+		ID: e.ID().String(),
+		PageFunc: func(page int, embed *discord.EmbedBuilder) {
+			embed = utils.QueueEmbedHandler(*track, queuePages[page])
+			embed.SetFooterText(
+				fmt.Sprintf("Page %d/%d", page+1, len(queuePages)),
+			)
+		},
+		Pages:      len(queuePages),
+		Creator:    e.User().ID,
+		ExpireMode: paginator.ExpireModeAfterLastUsage,
+	}, false)
+	if err != nil {
+		b.Music.MusicLogger.Error(err)
+		return e.Respond(
+			discord.InteractionResponseTypeCreateMessage,
+			discord.NewMessageUpdateBuilder().
+				SetEmbeds(utils.ErrorEmbed("An error has occured.")).
+				Build(),
+		)
+	}
+
+	return nil
+
 }

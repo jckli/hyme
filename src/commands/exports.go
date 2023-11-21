@@ -11,6 +11,7 @@ var CommandList = []discord.ApplicationCommandCreate{
 	infoCommand,
 	playCommand,
 	skipCommand,
+	queueCommand,
 }
 
 func CommandHandlers(b *dbot.Bot) *handler.Mux {
@@ -26,6 +27,9 @@ func CommandHandlers(b *dbot.Bot) *handler.Mux {
 	})
 	h.Command("/skip", func(e *handler.CommandEvent) error {
 		return skipHandler(e, b)
+	})
+	h.Command("/queue", func(e *handler.CommandEvent) error {
+		return queueHandler(e, b)
 	})
 
 	return h
