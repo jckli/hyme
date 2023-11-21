@@ -40,9 +40,20 @@ func New(version string) *Bot {
 	logger.Infof("Starting bot version: %s", version)
 
 	return &Bot{
-		Logger:    logger,
-		Version:   version,
-		Paginator: paginator.New(),
+		Logger:  logger,
+		Version: version,
+		Paginator: paginator.New(
+			paginator.WithEmbedColor(0xa4849a),
+			paginator.WithButtonsConfig(
+				paginator.ButtonsConfig{
+					First: paginator.DefaultConfig().ButtonsConfig.First,
+					Back:  paginator.DefaultConfig().ButtonsConfig.Back,
+					Stop:  nil,
+					Next:  paginator.DefaultConfig().ButtonsConfig.Next,
+					Last:  paginator.DefaultConfig().ButtonsConfig.Last,
+				},
+			),
+		),
 		Config: Config{
 			Token:       os.Getenv("TOKEN"),
 			DevMode:     os.Getenv("DEV_MODE") == "true",

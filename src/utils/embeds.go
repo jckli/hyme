@@ -68,21 +68,20 @@ func SkipEmbedHandler(track *lavalink.Track, amount int) discord.Embed {
 }
 
 func QueueEmbedHandler(
+	embed *discord.EmbedBuilder,
 	track lavalink.Track,
 	queue string,
-) *discord.EmbedBuilder {
-	embed := discord.NewEmbedBuilder().
-		SetColor(0xa4849a).
-		SetTitle("Queue").
-		SetDescription("**Now Playing:**\n")
+) {
+	embed.
+		SetTitle("Queue")
 
-	var description string
+	description := "**Now Playing:**\n"
 	if track.Info.Author != "" {
-		description = "[`" + track.Info.Title + "`](" + *track.Info.URI + ") by `" + track.Info.Author + "`\n[" + FormatDuration(
+		description += "[`" + track.Info.Title + "`](" + *track.Info.URI + ") by `" + track.Info.Author + "`\n[" + FormatDuration(
 			track.Info.Length,
 		) + "]"
 	} else {
-		description = "[`" + track.Info.Title + "`](" + *track.Info.URI + ")\n[" + FormatDuration(track.Info.Length) + "]"
+		description += "[`" + track.Info.Title + "`](" + *track.Info.URI + ")\n[" + FormatDuration(track.Info.Length) + "]"
 	}
 	embed.SetDescription(description)
 
@@ -91,6 +90,4 @@ func QueueEmbedHandler(
 	}
 
 	embed.AddField("Up Next", queue, false)
-
-	return embed
 }

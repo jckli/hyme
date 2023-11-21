@@ -249,35 +249,36 @@ func queueHandler(e *handler.CommandEvent, b *dbot.Bot) error {
 		pageText = "No songs in queue."
 		queuePages = append(queuePages, pageText)
 	} else {
-		for i, track := range queue.Tracks {
-			// every 15 tracks, create a new page
-			if i%15 == 0 && i != 0 {
-				pageText = ""
-			} else {
+		split := utils.Chunks(queue.Tracks, 10)
+		i := 1
+		for _, chunk := range split {
+			for _, track := range chunk {
 				track := fmt.Sprintf(
 					"%d. [`%s`](%s) [%s]\n",
-					i+1,
+					i,
 					track.Info.Title,
 					*track.Info.URI,
 					utils.FormatDuration(track.Info.Length),
 				)
 				pageText += track
+				i++
 			}
 			queuePages = append(queuePages, pageText)
+			pageText = ""
+
 		}
 	}
 
 	err := b.Paginator.Create(e.Respond, paginator.Pages{
 		ID: e.ID().String(),
 		PageFunc: func(page int, embed *discord.EmbedBuilder) {
-			embed = utils.QueueEmbedHandler(*track, queuePages[page])
+			utils.QueueEmbedHandler(embed, *track, queuePages[page])
 			embed.SetFooterText(
 				fmt.Sprintf("Page %d/%d", page+1, len(queuePages)),
 			)
 		},
-		Pages:      len(queuePages),
-		Creator:    e.User().ID,
-		ExpireMode: paginator.ExpireModeAfterLastUsage,
+		Pages:   len(queuePages),
+		Creator: e.User().ID,
 	}, false)
 	if err != nil {
 		b.Music.MusicLogger.Error(err)
@@ -290,5 +291,4 @@ func queueHandler(e *handler.CommandEvent, b *dbot.Bot) error {
 	}
 
 	return nil
-
 }
