@@ -14,7 +14,7 @@ func autoLeaveTimeout(
 	b *Music,
 	guildId *snowflake.ID,
 ) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Minute)
 	b.MusicLogger.Infof("Starting auto leave timer for guild: %s", guildId)
 	queue.Cancel = cancel
 	<-ctx.Done()

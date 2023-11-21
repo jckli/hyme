@@ -40,7 +40,10 @@ func TrackHandler(
 	player := b.Lavalink.Player(*e.GuildID())
 	queue := b.Players.Get(*e.GuildID())
 
-	var description string
+	var (
+		description string
+		embed       discord.Embed
+	)
 
 	if player.Track() == nil {
 		track := tracks[0]
@@ -60,20 +63,21 @@ func TrackHandler(
 				)
 			return err
 		}
-		description = "Playing track: [`" + track.Info.Title + "`](" + *track.Info.URI + ")"
+		embed = utils.PlayEmbedHandler(&track)
 	} else {
 		b.MusicLogger.Infof("Queue: %s", queue)
 		b.MusicLogger.Infof("Queue length: %d", len(queue.Tracks))
 		if len(tracks) > 0 {
 			queue.Add(tracks...)
-			description += "Added `" + strconv.Itoa(len(tracks)) + "` tracks to the queue."
+			description = "Added `" + strconv.Itoa(len(tracks)) + "` tracks to the queue."
 			b.MusicLogger.Infof("Queue length New: %d", len(queue.Tracks))
 		} else {
 			queue.Add(tracks...)
-			description += "Added [`" + tracks[0].Info.Title + "`](" + *tracks[0].Info.URI + ")" + "` to the queue."
+			description = "Added [`" + tracks[0].Info.Title + "`](" + *tracks[0].Info.URI + ")" + "` to the queue."
 			b.MusicLogger.Infof("Queue length New: %d", len(queue.Tracks))
 		}
 		b.MusicLogger.Infof("Queue New: %s", queue)
+		embed = utils.SuccessEmbed(description)
 	}
 
 	e.Client().
@@ -83,7 +87,7 @@ func TrackHandler(
 			e.Token(),
 			discord.
 				NewMessageUpdateBuilder().
-				SetEmbeds(utils.SuccessEmbed(description)).
+				SetEmbeds(embed).
 				Build(),
 		)
 	return nil
