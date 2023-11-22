@@ -306,7 +306,7 @@ var disconnectCommand = discord.SlashCommandCreate{
 
 func disconnectHandler(e *handler.CommandEvent, b *dbot.Bot) error {
 	player := b.Music.Lavalink.Player(*e.GuildID())
-	if player == nil {
+	if player.ChannelID() == nil {
 		return e.Respond(
 			discord.InteractionResponseTypeCreateMessage,
 			discord.NewMessageUpdateBuilder().
