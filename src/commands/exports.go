@@ -19,6 +19,7 @@ var CommandList = []discord.ApplicationCommandCreate{
 	shuffleCommand,
 	moveCommand,
 	removeCommand,
+	hypeCommand,
 }
 
 func CommandHandlers(b *dbot.Bot) *handler.Mux {
@@ -58,6 +59,11 @@ func CommandHandlers(b *dbot.Bot) *handler.Mux {
 	})
 	h.Command("/remove", func(e *handler.CommandEvent) error {
 		return removeHandler(e, b)
+	})
+
+	// Hype Command
+	h.Command("/hype", func(e *handler.CommandEvent) error {
+		return hypeHandler(e, b)
 	})
 
 	return h
