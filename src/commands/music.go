@@ -283,7 +283,6 @@ func queueHandler(e *handler.CommandEvent, b *dbot.Bot) error {
 			)
 		},
 		Pages:      len(queuePages),
-		Creator:    e.User().ID,
 		ExpireMode: paginator.ExpireModeAfterLastUsage,
 	}, false)
 	if err != nil {
