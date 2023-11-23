@@ -253,25 +253,28 @@ func queueHandler(e *handler.CommandEvent, b *dbot.Bot) error {
 		pageText = "No songs in queue."
 		queuePages = append(queuePages, pageText)
 	} else {
-		var characters int
-		for i, track := range queue.Tracks {
-			characters += len(fmt.Sprintf(
-				"%d. [`%s`](%s) by `%s` [%s]\n",
-				i+1,
-				track.Info.Title,
-				*track.Info.URI,
-				track.Info.Author,
-				utils.FormatDuration(track.Info.Length),
-			))
-		}
-		amtChunks := characters / 2500
-		b.Music.MusicLogger.Infof("Queue is %d characters long, splitting into %d chunks", characters, amtChunks)
-		if amtChunks > 8 {
-			amtChunks = 8
-		}
-		b.Music.MusicLogger.Infof("Chunks more than 10, splitting into %d chunks", amtChunks)
+		var split [][]lavalink.Track
+		if le := len(queue.Tracks); le > 8 {
+			var characters int
+			for i, track := range queue.Tracks {
+				characters += len(fmt.Sprintf(
+					"%d. [`%s`](%s) by `%s` [%s]\n",
+					i+1,
+					track.Info.Title,
+					*track.Info.URI,
+					track.Info.Author,
+					utils.FormatDuration(track.Info.Length),
+				))
+			}
+			amtChunks := characters / 2500
+			if amtChunks > 8 {
+				amtChunks = 8
+			}
 
-		split := utils.Chunks(queue.Tracks, int(amtChunks))
+			split = utils.Chunks(queue.Tracks, int(amtChunks))
+		} else {
+			split = utils.Chunks(queue.Tracks, 8)
+		}
 		i := 1
 		for _, chunk := range split {
 			for _, track := range chunk {
